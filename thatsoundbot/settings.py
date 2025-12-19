@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     )
 
 
-@lru_cache
+@lru_cache()
 def get_settings() -> Settings:
     """Cached settings function"""
     return Settings()  # type: ignore[call-arg]
