@@ -1,0 +1,27 @@
+[project]
+name = "thatsoundbot"
+version = "0.1.0"
+description = "That sound telegram bot"
+authors = [
+    {name = "yepIwt",email = "ReetRay@protonmail.com"}
+]
+license = {text = "GPLv3"}
+readme = "README.md"
+requires-python = ">=3.13,<3.15"
+dependencies = [
+    "aiogram (>=3.23.0,<4.0.0)",
+    "pydantic (>=2.12.5,<3.0.0)",
+    "pydantic-settings (>=2.12.0,<3.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "ruff (>=0.14.10,<0.15.0)",
+    "mypy (>=1.19.1,<2.0.0)",
+    "pre-commit (>=4.5.1,<5.0.0)"
+]
