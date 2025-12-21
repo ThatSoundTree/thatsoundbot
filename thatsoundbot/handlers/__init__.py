@@ -1,5 +1,5 @@
 """Handlers module."""
 
-from thatsoundbot.handlers.echo import router as echo_router
+from thatsoundbot.handlers.start import router as start_router
 
-__all__ = ["echo_router"]
+__all__ = ["start_router"]

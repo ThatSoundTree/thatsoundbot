@@ -1,0 +1,5 @@
+"""Backend API client module."""
+
+from thatsoundbot.backend.client import APIClient, APIError
+
+__all__ = ["APIClient", "APIError"]
