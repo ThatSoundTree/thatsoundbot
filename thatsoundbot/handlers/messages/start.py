@@ -1,24 +1,8 @@
 from aiogram.types import InlineKeyboardMarkup
 
+from thatsoundbot.handlers.messages.texts import TEXTS
 from thatsoundbot.keyboards.integrations import create_integrations_keyboard
 from thatsoundbot.models import User
-
-# TODO: Add multi-language support in the future
-# Structure: LANGUAGES = {"ru": {...}, "en": {...}}
-# Then use: texts = LANGUAGES.get(user_language, LANGUAGES["ru"])
-
-
-TEXTS = {
-    "start": {
-        "welcome_new": "Добро пожаловать,",
-        "welcome_returning": "Привет снова,",
-        "integrations_available": "в боте доступны следующие интеграции:",
-        "integrations_yours": "Твои интеграции:",
-    },
-    "integrations": {
-        "connected_alert": "И это замечательно!",
-    },
-}
 
 
 def format_start_message(

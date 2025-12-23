@@ -1,5 +1,3 @@
-from loguru import logger
-
 from thatsoundbot.backend.client import APIClient
 from thatsoundbot.models import User
 from thatsoundbot.settings import get_settings
@@ -24,6 +22,4 @@ async def mention_user(htelegram_id: str) -> User:
             user_data = response if isinstance(response, dict) else {}
 
         user = User.model_validate(user_data)
-        is_new = user.message is not None
-        logger.info(f"User mentioned: htelegram_id={htelegram_id[:8]}, new={is_new}")
         return user
