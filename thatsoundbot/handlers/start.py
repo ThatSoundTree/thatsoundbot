@@ -1,3 +1,5 @@
+from loguru import logger
+
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
@@ -18,6 +20,9 @@ async def start_handler(message: Message) -> None:
     telegram_id = message.from_user.id
     htelegram_id = hash_telegram_id(telegram_id)
     user = await mention_user(htelegram_id)
+
+    is_new = user.message is not None
+    logger.info(f"User mentioned: htelegram_id={htelegram_id[:8]}, new={is_new}")
 
     text, keyboard = format_start_message(user, htelegram_id)
     await message.answer(text, reply_markup=keyboard)
