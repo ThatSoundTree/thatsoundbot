@@ -5,6 +5,7 @@ from loguru import logger
 from thatsoundbot.handlers.messages.texts import TEXTS
 from thatsoundbot.keyboards.inline import create_error_result, create_inline_result
 from thatsoundbot.services.inline import (
+    create_track_download_task,
     fetch_tracks,
     get_track_by_id,
     handle_inline_error,
@@ -62,13 +63,13 @@ async def chosen_inline_result_handler(chosen_result: ChosenInlineResult) -> Non
         logger.warning("Track not found: track_id=%s", track_id)
         return
 
-    if chosen_result.inline_message_id:
-        await chosen_result.bot.edit_message_text(
-            inline_message_id=chosen_result.inline_message_id,
-            text="Loading...",
-        )
-    else:
-        await chosen_result.bot.send_message(
+    message_id = chosen_result.inline_message_id
+    if not message_id:
+        message = await chosen_result.bot.send_message(
             chat_id=chosen_result.from_user.id,
-            text="Loading...",
+            text="Downloading...",
         )
+        message_id = str(message.message_id)
+    result = await create_track_download_task(track, message_id)
+    if isinstance(result, Exception):
+        logger.error("Failed to create download task: %s", result)

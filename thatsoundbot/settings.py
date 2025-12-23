@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     API_URL: str
     SECRET_KEY: SecretStr
     API_KEY: SecretStr
+    DIRECT_API_URL: str
 
     model_config = SettingsConfigDict(
         env_file=".env", case_sensitive=False, extra="ignore", env_prefix="TELEGRAM_BOT_"

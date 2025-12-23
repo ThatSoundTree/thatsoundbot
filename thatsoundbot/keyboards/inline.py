@@ -12,7 +12,7 @@ def create_inline_result(track: SpotifyTrack, index: int) -> InlineQueryResultAr
         title=track.name,
         description=artists,
         input_message_content=InputTextMessageContent(
-            message_text="Loading...",
+            message_text="Downloading...",
         ),
     )
 
