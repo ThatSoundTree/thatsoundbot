@@ -1,3 +1,5 @@
+import asyncio
+
 from aiogram import Router
 from aiogram.types import ChosenInlineResult, InlineQuery, InlineQueryResultArticle
 from httpx import HTTPStatusError
@@ -51,9 +53,15 @@ async def inline_query_handler(inline_query: InlineQuery) -> None:
         await inline_query.answer(results=[error_result], cache_time=1)
         return
 
-    results = [
-        create_inline_result(track, index) for index, track in enumerate(response.tracks)
-    ]
+    bot = inline_query.bot
+    if not bot:
+        await inline_query.answer(results=[], cache_time=1)
+        return
+
+    chat_id = inline_query.from_user.id
+    results = await asyncio.gather(
+        *[create_inline_result(track, index, bot, chat_id) for index, track in enumerate(response.tracks)]
+    )
 
     await inline_query.answer(results=results, cache_time=1)  # type: ignore[arg-type]
 
