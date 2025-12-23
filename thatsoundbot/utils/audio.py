@@ -27,21 +27,8 @@ def _get_base_mp3() -> BytesIO:
 
 
 async def create_audio_file(track: SpotifyTrack, album_cover_data: bytes | None) -> BytesIO:
-    """Create MP3 file with metadata in memory using base template."""
-    base_buffer = _get_base_mp3()
-    base_buffer.seek(0)
-    base_data = base_buffer.read()
-
-    buffer = BytesIO(base_data)
-    buffer.seek(0)
-
-    tags = ID3(buffer)
-    audio_start = buffer.tell()
-
-    tags.delall("TIT2")
-    tags.delall("TPE1")
-    tags.delall("TALB")
-    tags.delall("APIC")
+    """Create MP3 file with metadata and zero duration."""
+    tags = ID3()
 
     tags.add(TIT2(encoding=3, text=track.name))
     tags.add(TPE1(encoding=3, text=", ".join(track.artists) if track.artists else "Unknown Artist"))
@@ -55,12 +42,4 @@ async def create_audio_file(track: SpotifyTrack, album_cover_data: bytes | None)
     output = BytesIO()
     tags.save(output, v2_version=3)
     output.seek(0)
-    id3_data = output.read()
-
-    audio_data = base_data[audio_start:] if audio_start < len(base_data) else _BASE_MP3_DATA
-
-    final_output = BytesIO()
-    final_output.write(id3_data)
-    final_output.write(audio_data)
-    final_output.seek(0)
-    return final_output
+    return output
