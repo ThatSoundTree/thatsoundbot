@@ -8,7 +8,6 @@ TEXTS = {
     "integrations": {
         "connected_alert": "И это замечательно!",
         "status_updated": "Статус обновлен",
-        "status_updating": "Обновление статуса...",
         "refresh_button": "⚙️ Обновить",
         "refresh_button_loading": "👀 Обновление...",
     },

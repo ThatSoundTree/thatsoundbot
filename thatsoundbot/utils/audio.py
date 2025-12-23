@@ -5,28 +5,7 @@ from mutagen.id3 import APIC, ID3, TALB, TIT2, TPE1
 from thatsoundbot.models import SpotifyTrack
 
 
-_BASE_MP3_DATA = (
-    b"\xff\xfb\x90\x00"
-    + b"\x00" * 417
-)
-
-_base_mp3_buffer: BytesIO | None = None
-
-
-def _get_base_mp3() -> BytesIO:
-    """Get base MP3 file buffer with ID3 tags, creating it if needed."""
-    global _base_mp3_buffer
-    if _base_mp3_buffer is None:
-        buffer = BytesIO(_BASE_MP3_DATA)
-        tags = ID3()
-        tags.save(buffer, v2_version=3)
-        buffer.seek(0)
-        _base_mp3_buffer = BytesIO(buffer.getvalue())
-        _base_mp3_buffer.seek(0)
-    return _base_mp3_buffer
-
-
-async def create_audio_file(track: SpotifyTrack, album_cover_data: bytes | None) -> BytesIO:
+def create_audio_file(track: SpotifyTrack, album_cover_data: bytes | None) -> BytesIO:
     """Create MP3 file with metadata and zero duration."""
     tags = ID3()
 

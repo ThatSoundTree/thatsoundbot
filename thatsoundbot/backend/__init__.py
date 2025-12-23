@@ -1,3 +1,3 @@
-from thatsoundbot.backend.client import APIClient, APIError
+from thatsoundbot.backend.client import APIClient
 
-__all__ = ["APIClient", "APIError"]
+__all__ = ["APIClient"]

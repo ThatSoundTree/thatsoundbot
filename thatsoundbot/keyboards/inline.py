@@ -3,7 +3,7 @@ from aiogram.types import InlineQueryResultArticle, InputTextMessageContent
 from thatsoundbot.models import SpotifyTrack
 
 
-async def create_inline_result(track: SpotifyTrack, index: int, bot, chat_id: int) -> InlineQueryResultArticle:
+def create_inline_result(track: SpotifyTrack, index: int) -> InlineQueryResultArticle:
     """Create inline query result with track metadata text."""
     artists = ", ".join(track.artists) if track.artists else "Unknown Artist"
 

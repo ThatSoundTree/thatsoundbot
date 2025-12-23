@@ -1,5 +1,3 @@
-import asyncio
-
 import httpx
 from aiogram import Router
 from aiogram.types import BufferedInputFile, ChosenInlineResult, InlineQuery, InlineQueryResultArticle, InputMediaAudio
@@ -72,15 +70,9 @@ async def inline_query_handler(inline_query: InlineQuery) -> None:
         await inline_query.answer(results=[error_result], cache_time=1)
         return
 
-    bot = inline_query.bot
-    if not bot:
-        await inline_query.answer(results=[], cache_time=1)
-        return
-
-    chat_id = inline_query.from_user.id
-    results = await asyncio.gather(
-        *[create_inline_result(track, index, bot, chat_id) for index, track in enumerate(response.tracks)]
-    )
+    results = [
+        create_inline_result(track, index) for index, track in enumerate(response.tracks)
+    ]
 
     await inline_query.answer(results=results, cache_time=1)  # type: ignore[arg-type]
 
@@ -111,7 +103,7 @@ async def chosen_inline_result_handler(chosen_result: ChosenInlineResult) -> Non
             if response.status_code == 200:
                 album_cover_data = response.content
 
-    audio_buffer = await create_audio_file(track, album_cover_data)
+    audio_buffer = create_audio_file(track, album_cover_data)
     audio_file = BufferedInputFile(audio_buffer.getvalue(), filename=f"{track.id}.mp3")
 
     if chosen_result.inline_message_id:
