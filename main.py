@@ -3,7 +3,7 @@ import asyncio
 from loguru import logger
 
 from thatsoundbot.core import create_bot, create_dispatcher
-from thatsoundbot.handlers import integrations_router, start_router
+from thatsoundbot.handlers import inline_router, integrations_router, start_router
 from thatsoundbot.settings import get_settings
 
 
@@ -14,6 +14,7 @@ async def main() -> None:
     dp = create_dispatcher()
     dp.include_router(start_router)
     dp.include_router(integrations_router)
+    dp.include_router(inline_router)
 
     logger.info("Bot is starting...")
     await dp.start_polling(bot)

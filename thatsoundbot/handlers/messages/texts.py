@@ -1,7 +1,3 @@
-# TODO: Add multi-language support in the future
-# Structure: LANGUAGES = {"ru": {...}, "en": {...}}
-# Then use: texts = LANGUAGES.get(user_language, LANGUAGES["ru"])
-
 TEXTS = {
     "start": {
         "welcome_new": "Добро пожаловать,",
@@ -15,5 +11,10 @@ TEXTS = {
         "status_updating": "Обновление статуса...",
         "refresh_button": "⚙️ Обновить",
         "refresh_button_loading": "👀 Обновление...",
+    },
+    "inline": {
+        "no_tracks": "❌ Не найдено недавних треков",
+        "not_authorized": "🔐 Авторизуйтесь в Spotify для работы с ботом",
+        "error": "❌ Ошибка при получении треков",
     },
 }

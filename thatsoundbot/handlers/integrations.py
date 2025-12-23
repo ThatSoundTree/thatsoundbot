@@ -31,17 +31,14 @@ async def refresh_status_handler(callback: CallbackQuery) -> None:
         await callback.answer()
         return
 
-    # Type check: ensure message is Message, not InaccessibleMessage
     if not isinstance(callback.message, Message):
         await callback.answer()
         return
 
-    # Get current keyboard and save it for error recovery
     old_keyboard = callback.message.reply_markup
     telegram_id = callback.from_user.id
     htelegram_id = hash_telegram_id(telegram_id)
 
-    # Step 1: Show loading animation - change refresh button to "обновление 👀"
     if old_keyboard and old_keyboard.inline_keyboard:
         from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
@@ -50,7 +47,6 @@ async def refresh_status_handler(callback: CallbackQuery) -> None:
             loading_row = []
             for button in row:
                 if button.callback_data == "refresh_status":
-                    # Replace with loading button
                     loading_row.append(
                         InlineKeyboardButton(
                             text=TEXTS["integrations"]["refresh_button_loading"],
@@ -65,11 +61,9 @@ async def refresh_status_handler(callback: CallbackQuery) -> None:
         try:
             await callback.message.edit_reply_markup(reply_markup=loading_keyboard)
         except Exception:
-            # If edit fails, continue anyway
             pass
 
     try:
-        # Get old integration statuses from original keyboard (before loading state)
         old_integrations_status = {}
         if old_keyboard and old_keyboard.inline_keyboard:
             from thatsoundbot.settings import get_settings, get_integrations
@@ -84,7 +78,6 @@ async def refresh_status_handler(callback: CallbackQuery) -> None:
                             is_connected = parts[2] == "connected"
                             old_integrations_status[integration_name] = is_connected
                     elif button.url:
-                        # Check if it's an integration URL button
                         for integration_config in get_integrations():
                             expected_url = integration_config["connect_url_template"].format(
                                 api_url=settings.API_URL, htelegram_id=htelegram_id
@@ -93,10 +86,8 @@ async def refresh_status_handler(callback: CallbackQuery) -> None:
                                 old_integrations_status[integration_config["name"]] = False
                                 break
 
-        # Fetch updated user data from backend
         user = await mention_user(htelegram_id)
 
-        # Compare old and new statuses to detect changes
         new_integrations_data = user.integrations.model_dump()
         changed_integrations = []
 
@@ -105,15 +96,12 @@ async def refresh_status_handler(callback: CallbackQuery) -> None:
             if old_status is not None and old_status != is_enabled:
                 changed_integrations.append(integration_name)
 
-        # Update keyboard - only changed buttons will be updated
-        # Use current keyboard (might have loading state) or old keyboard
         keyboard_to_update = callback.message.reply_markup or old_keyboard
         updated_keyboard = update_integrations_keyboard(
             keyboard_to_update, user, htelegram_id, refresh_button_loading=False
         )
         await callback.message.edit_reply_markup(reply_markup=updated_keyboard)
 
-        # Show notification if something changed
         if changed_integrations:
             changed_names = ", ".join([name.capitalize() for name in changed_integrations])
             await callback.answer(
@@ -124,20 +112,17 @@ async def refresh_status_handler(callback: CallbackQuery) -> None:
             await callback.answer()
 
     except Exception as e:
-        # Handle errors gracefully - restore original keyboard
         from loguru import logger
         from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
         logger.error(f"Error refreshing status: {e}")
 
-        # Restore original keyboard (remove loading state from refresh button)
         if old_keyboard and old_keyboard.inline_keyboard:
             restored_rows = []
             for row in old_keyboard.inline_keyboard:
                 restored_row = []
                 for button in row:
                     if button.callback_data == "refresh_status":
-                        # Restore original refresh button
                         restored_row.append(
                             InlineKeyboardButton(
                                 text=TEXTS["integrations"]["refresh_button"],
