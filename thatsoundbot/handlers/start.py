@@ -19,5 +19,5 @@ async def start_handler(message: Message) -> None:
     htelegram_id = hash_telegram_id(telegram_id)
     user = await mention_user(htelegram_id)
 
-    response = format_start_message(user, htelegram_id)
-    await message.answer(response)
+    text, keyboard = format_start_message(user, htelegram_id)
+    await message.answer(text, reply_markup=keyboard)

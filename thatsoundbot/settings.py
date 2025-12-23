@@ -1,6 +1,15 @@
 from functools import lru_cache
+from typing import TypedDict
+
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class IntegrationConfig(TypedDict):
+    """Integration configuration."""
+
+    name: str
+    connect_url_template: str
 
 
 class Settings(BaseSettings):
@@ -20,3 +29,13 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     """Cached settings function"""
     return Settings()  # type: ignore[call-arg]
+
+
+def get_integrations() -> list[IntegrationConfig]:
+    """List of available integrations."""
+    return [
+        {
+            "name": "spotify",
+            "connect_url_template": "{api_url}/api/v1/spotify/login/{htelegram_id}",
+        }
+    ]
