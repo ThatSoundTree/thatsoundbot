@@ -1,9 +1,9 @@
 from aiogram import F, Router
 from aiogram.types import CallbackQuery, Message
 
-from thatsoundbot.backend.api import mention_user
 from thatsoundbot.handlers.messages.texts import TEXTS
 from thatsoundbot.keyboards.integrations import update_integrations_keyboard
+from thatsoundbot.repositories.users import mention_user
 from thatsoundbot.utils.hashing import hash_telegram_id
 
 router = Router(name="integrations")

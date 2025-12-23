@@ -4,8 +4,8 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
-from thatsoundbot.backend.api import mention_user
 from thatsoundbot.handlers.messages import format_start_message
+from thatsoundbot.repositories.users import mention_user
 from thatsoundbot.utils.hashing import hash_telegram_id
 
 router = Router(name="start")
