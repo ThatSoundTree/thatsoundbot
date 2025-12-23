@@ -1,45 +1,29 @@
-from typing import Any
-
-import httpx
 from loguru import logger
 
-from thatsoundbot.backend.client import APIClient, APIError
+from thatsoundbot.backend.client import APIClient
+from thatsoundbot.models import User
 from thatsoundbot.settings import get_settings
 
 
-async def mention_user(
-    htelegram_id: str,
-    client: APIClient | None = None,
-) -> dict[str, Any]:
+async def mention_user(htelegram_id: str) -> User:
     """Get or create a user by hashed Telegram ID."""
-    logger.info("Mention user", extra={"htelegram_id": htelegram_id})
+    settings = get_settings()
+    async with APIClient(settings) as client:
+        response = await client.post(f"/api/v1/users/{htelegram_id}")
 
-    async def _make_request(client_to_use: APIClient) -> dict[str, Any]:
-        """Make the API request with error handling."""
-        try:
-            result = await client_to_use.post(f"/api/v1/users/{htelegram_id}")
-            logger.info(f"User mentioned: {result}")
-            return result
-        except httpx.HTTPStatusError as e:
-            logger.error(
-                f"Failed to mention user: HTTP {e.response.status_code}",
-                extra={"htelegram_id": htelegram_id, "status_code": e.response.status_code},
-            )
-            raise APIError(
-                f"API request failed: {e.response.status_code}",
-                status_code=e.response.status_code,
-            ) from e
-        except httpx.RequestError as e:
-            logger.error(
-                "Failed to mention user: request error",
-                extra={"htelegram_id": htelegram_id},
-            )
-            raise APIError(f"API request failed: {str(e)}") from e
+        # Extract user data from response wrapper
+        if isinstance(response, dict):
+            user_data = response.get("data", {})
+            if not isinstance(user_data, dict):
+                user_data = {}
+            # Extract message from top-level response if it exists
+            if "message" in response:
+                user_data["message"] = response["message"]
+        else:
+            # If response is not a dict, treat it as user data directly
+            user_data = response if isinstance(response, dict) else {}
 
-    # Use provided client or create a new one
-    if client is None:
-        settings = get_settings()
-        async with APIClient(settings) as c:
-            return await _make_request(c)
-
-    return await _make_request(client)
+        user = User.model_validate(user_data)
+        is_new = user.message is not None
+        logger.info(f"User mentioned: htelegram_id={htelegram_id[:8]}, new={is_new}")
+        return user
