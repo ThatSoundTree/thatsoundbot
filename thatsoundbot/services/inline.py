@@ -48,7 +48,9 @@ async def get_track_by_id(htelegram_id: str, track_id: str) -> SpotifyTrack | No
     return None
 
 
-async def create_track_download_task(track: SpotifyTrack, message_id: str | None) -> dict | Exception:
+async def create_track_download_task(
+    track: SpotifyTrack, htelegram_id: str, message_id: str | None
+) -> dict | Exception:
     """Create download task for track on external backend."""
-    result = await create_download_task(track, message_id)
+    result = await create_download_task(track, htelegram_id, message_id)
     return result

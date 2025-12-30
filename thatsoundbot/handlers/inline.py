@@ -1,5 +1,5 @@
-from aiogram import Router
-from aiogram.types import ChosenInlineResult, InlineQuery
+from aiogram import F, Router
+from aiogram.types import ChosenInlineResult, InlineQuery, Message
 from loguru import logger
 
 from thatsoundbot.handlers.messages.texts import TEXTS
@@ -41,7 +41,7 @@ async def inline_query_handler(inline_query: InlineQuery) -> None:
         create_inline_result(track, index) for index, track in enumerate(response.tracks)
     ]
 
-    await inline_query.answer(results=results, cache_time=1)  # type: ignore[arg-type]
+    await inline_query.answer(results=results, cache_time=0)  # type: ignore[arg-type]
 
 
 @router.chosen_inline_result()
@@ -64,12 +64,44 @@ async def chosen_inline_result_handler(chosen_result: ChosenInlineResult) -> Non
         return
 
     message_id = chosen_result.inline_message_id
-    if not message_id:
+    if message_id:
+        await chosen_result.bot.edit_message_text(
+            inline_message_id=message_id,
+            text="Downloading...",
+        )
+    else:
         message = await chosen_result.bot.send_message(
             chat_id=chosen_result.from_user.id,
             text="Downloading...",
         )
         message_id = str(message.message_id)
-    result = await create_track_download_task(track, message_id)
+
+    result = await create_track_download_task(track, htelegram_id, message_id)
+    if isinstance(result, Exception):
+        logger.error("Failed to create download task: %s", result)
+
+
+@router.message(F.text == "Downloading...", F.via_bot.is_not(None))
+async def inline_result_message_handler(message: Message) -> None:
+    """Handle message sent via inline query result."""
+    if not message.from_user or not message.bot:
+        return
+
+    if not message.via_bot or message.via_bot.id != message.bot.id:
+        return
+
+    telegram_id = message.from_user.id
+    htelegram_id = hash_telegram_id(telegram_id)
+
+    recent_tracks = await fetch_tracks(htelegram_id)
+    if isinstance(recent_tracks, Exception) or not recent_tracks.tracks:
+        return
+
+    track = recent_tracks.tracks[0] if recent_tracks.tracks else None
+    if not track:
+        return
+
+    message_id = str(message.message_id)
+    result = await create_track_download_task(track, htelegram_id, message_id)
     if isinstance(result, Exception):
         logger.error("Failed to create download task: %s", result)
