@@ -17,7 +17,18 @@ async def main() -> None:
     dp.include_router(inline_router)
 
     logger.info("Bot is starting...")
-    await dp.start_polling(bot)
+
+    bot_info = await bot.get_me()
+    logger.info(
+        "Bot connected successfully: @{username} (id: {id})",
+        username=bot_info.username,
+        id=bot_info.id,
+    )
+
+    logger.info("Starting polling...")
+    await dp.start_polling(bot, drop_pending_updates=True)
+    await bot.session.close()
+    logger.info("Bot session closed")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,4 @@
 import httpx
-from loguru import logger
 
 from thatsoundbot.settings import get_settings
 
@@ -24,6 +23,17 @@ class TSDirectHTTPClient:
         kwargs["headers"] = headers
 
         async with httpx.AsyncClient(timeout=30.0) as client:
-            logger.debug("Making authenticated POST request to TSDirect", url=url)
             response = await client.post(url, **kwargs)
+            return response
+
+    @staticmethod
+    async def get(url: str, **kwargs) -> httpx.Response:
+        """Make authenticated GET request to TSDirect API."""
+        headers = TSDirectHTTPClient._get_auth_headers()
+        if "headers" in kwargs:
+            headers.update(kwargs["headers"])
+        kwargs["headers"] = headers
+
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(url, **kwargs)
             return response

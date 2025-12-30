@@ -4,19 +4,9 @@ from loguru import logger
 
 from thatsoundbot.handlers.messages.texts import TEXTS
 from thatsoundbot.keyboards.inline import create_error_result
-from thatsoundbot.models import RecentTracksResponse, SpotifyTrack
+from thatsoundbot.models import SpotifyTrack
 from thatsoundbot.repositories.downloads import create_download_task
 from thatsoundbot.repositories.sounds import get_recent_tracks
-
-
-async def fetch_tracks(htelegram_id: str) -> RecentTracksResponse | Exception:
-    """Fetch tracks with error handling, returns result or exception."""
-    error: Exception
-    try:
-        result = await get_recent_tracks(htelegram_id)
-        return result
-    except Exception as error:
-        return error
 
 
 def handle_inline_error(error: Exception, htelegram_id: str) -> InlineQueryResultArticle:
@@ -39,9 +29,7 @@ def parse_track_id(result_id: str) -> str | None:
 
 async def get_track_by_id(htelegram_id: str, track_id: str) -> SpotifyTrack | None:
     """Get track by ID from recent tracks."""
-    response = await fetch_tracks(htelegram_id)
-    if isinstance(response, Exception):
-        return None
+    response = await get_recent_tracks(htelegram_id)
     for track in response.tracks:
         if track.id == track_id:
             return track
@@ -49,8 +37,13 @@ async def get_track_by_id(htelegram_id: str, track_id: str) -> SpotifyTrack | No
 
 
 async def create_track_download_task(
-    track: SpotifyTrack, htelegram_id: str, message_id: str | None
+    track: SpotifyTrack,
+    htelegram_id: str,
+    message_id: str | None,
+    bot=None,
+    chat_id: int | None = None,
+    is_inline: bool = False,
 ) -> dict | Exception:
     """Create download task for track on external backend."""
-    result = await create_download_task(track, htelegram_id, message_id)
+    result = await create_download_task(track, htelegram_id, message_id, bot, chat_id, is_inline)
     return result

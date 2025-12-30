@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     API_KEY: SecretStr
     DIRECT_API_URL: str
     TSDIRECT_SECRET_KEY: SecretStr
+    TASK_STATUS_CHECK_INTERVAL: int = 10
+    TEMP_FILE_CHANNEL: str
 
     model_config = SettingsConfigDict(
         env_file=".env", case_sensitive=False, extra="ignore", env_prefix="TELEGRAM_BOT_"

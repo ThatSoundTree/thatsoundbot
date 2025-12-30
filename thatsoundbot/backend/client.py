@@ -38,7 +38,6 @@ class APIClient:
         if not self._client:
             raise RuntimeError("Client not initialized. Use async context manager.")
 
-        # Use relative endpoint - httpx will automatically concatenate with base_url
         url = endpoint.lstrip("/")
         json_data = json.model_dump(exclude_none=True) if isinstance(json, BaseModel) else json
 

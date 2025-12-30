@@ -31,7 +31,6 @@ def create_integrations_keyboard(
             )
             buttons.append([InlineKeyboardButton(text=button_text, url=connect_url)])
 
-    # Add refresh status button after all integration buttons
     refresh_text = (
         TEXTS["integrations"]["refresh_button_loading"]
         if refresh_button_loading
@@ -50,22 +49,18 @@ def update_integrations_keyboard(
 ) -> InlineKeyboardMarkup:
     """Update only changed integration buttons in keyboard."""
     if not old_keyboard or not old_keyboard.inline_keyboard:
-        # If no old keyboard, create new one
         return create_integrations_keyboard(user, htelegram_id, refresh_button_loading)
 
     new_integrations_data = user.integrations.model_dump()
     settings = get_settings()
     updated_buttons = []
 
-    # Process integration buttons
     for row in old_keyboard.inline_keyboard:
         updated_row = []
         for button in row:
-            # Skip refresh button, we'll add it at the end
             if button.callback_data == "refresh_status":
                 continue
 
-            # Check if this is an integration button with callback_data (connected)
             if button.callback_data and button.callback_data.startswith("integration:"):
                 parts = button.callback_data.split(":")
                 if len(parts) == 3:
@@ -74,12 +69,9 @@ def update_integrations_keyboard(
                         enabled = new_integrations_data[integration_name]
                         display_name = integration_name.capitalize()
 
-                        # Update button if status changed
                         if enabled:
-                            # Still connected, check if text needs update
                             new_text = f"{display_name}: подключено"
                             new_callback = f"integration:{integration_name}:connected"
-                            # Only update if text changed
                             if button.text != new_text:
                                 updated_row.append(
                                     InlineKeyboardButton(text=new_text, callback_data=new_callback)
@@ -87,9 +79,7 @@ def update_integrations_keyboard(
                             else:
                                 updated_row.append(button)
                         else:
-                            # Status changed: was connected, now disconnected - change to URL button
                             new_text = f"{display_name}: подключить"
-                            # Find correct URL from integration config
                             connect_url = None
                             for integration_config in get_integrations():
                                 if integration_config["name"] == integration_name:
@@ -101,15 +91,12 @@ def update_integrations_keyboard(
                             if connect_url:
                                 updated_row.append(InlineKeyboardButton(text=new_text, url=connect_url))
                             else:
-                                # Keep old button if URL not found
                                 updated_row.append(button)
                     else:
-                        # Integration not in new data, keep old button
                         updated_row.append(button)
                 else:
                     updated_row.append(button)
             elif button.url:
-                # This might be an integration URL button, check if it needs update
                 integration_name = None
                 for integration_config in get_integrations():
                     connect_url_template = integration_config["connect_url_template"]
@@ -123,25 +110,21 @@ def update_integrations_keyboard(
                 if integration_name and integration_name in new_integrations_data:
                     enabled = new_integrations_data[integration_name]
                     if enabled:
-                        # Status changed to connected, update button
                         display_name = integration_name.capitalize()
                         new_text = f"{display_name}: подключено"
                         updated_row.append(
                             InlineKeyboardButton(text=new_text, callback_data=f"integration:{integration_name}:connected")
                         )
                     else:
-                        # Still not connected, keep button
                         updated_row.append(button)
                 else:
                     updated_row.append(button)
             else:
-                # Not an integration button, keep as is
                 updated_row.append(button)
 
         if updated_row:
             updated_buttons.append(updated_row)
 
-    # Add refresh status button at the end
     refresh_text = (
         TEXTS["integrations"]["refresh_button_loading"]
         if refresh_button_loading
