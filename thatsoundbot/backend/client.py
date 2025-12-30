@@ -1,20 +1,9 @@
-from typing import Any, TypeVar
+from typing import Any
 
 import httpx
 from pydantic import BaseModel
 
 from thatsoundbot.settings import Settings
-
-T = TypeVar("T", bound=BaseModel)
-
-
-class APIError(Exception):
-    """Exception for API-related errors."""
-
-    def __init__(self, message: str, status_code: int | None = None) -> None:
-        super().__init__(message)
-        self.message = message
-        self.status_code = status_code
 
 
 class APIClient:
@@ -49,7 +38,6 @@ class APIClient:
         if not self._client:
             raise RuntimeError("Client not initialized. Use async context manager.")
 
-        # Use relative endpoint - httpx will automatically concatenate with base_url
         url = endpoint.lstrip("/")
         json_data = json.model_dump(exclude_none=True) if isinstance(json, BaseModel) else json
 
@@ -62,40 +50,15 @@ class APIClient:
         endpoint: str,
         *,
         params: dict[str, Any] | None = None,
-        response_model: type[T] | None = None,
-    ) -> T | dict[str, Any]:
+    ) -> dict[str, Any]:
         """Make GET request."""
-        data = await self._request("GET", endpoint, params=params)
-        return response_model.model_validate(data) if response_model else data
+        return await self._request("GET", endpoint, params=params)
 
     async def post(
         self,
         endpoint: str,
         *,
         json: dict[str, Any] | BaseModel | None = None,
-        response_model: type[T] | None = None,
-    ) -> T | dict[str, Any]:
+    ) -> dict[str, Any]:
         """Make POST request."""
-        data = await self._request("POST", endpoint, json=json)
-        return response_model.model_validate(data) if response_model else data
-
-    async def put(
-        self,
-        endpoint: str,
-        *,
-        json: dict[str, Any] | BaseModel | None = None,
-        response_model: type[T] | None = None,
-    ) -> T | dict[str, Any]:
-        """Make PUT request."""
-        data = await self._request("PUT", endpoint, json=json)
-        return response_model.model_validate(data) if response_model else data
-
-    async def delete(
-        self,
-        endpoint: str,
-        *,
-        response_model: type[T] | None = None,
-    ) -> T | dict[str, Any]:
-        """Make DELETE request."""
-        data = await self._request("DELETE", endpoint)
-        return response_model.model_validate(data) if response_model else data
+        return await self._request("POST", endpoint, json=json)

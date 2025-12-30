@@ -1,10 +1,11 @@
+from loguru import logger
+
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
-from aiogram.utils.markdown import hbold
-from loguru import logger
 
-from thatsoundbot.backend.api import mention_user
+from thatsoundbot.handlers.messages import format_start_message
+from thatsoundbot.repositories.users import mention_user
 from thatsoundbot.utils.hashing import hash_telegram_id
 
 router = Router(name="start")
@@ -13,13 +14,15 @@ router = Router(name="start")
 @router.message(Command("start"))
 async def start_handler(message: Message) -> None:
     """Handles the /start command and responds with a greeting."""
-    user_name = message.from_user.full_name if message.from_user else "Пользователь"
+    if not message.from_user:
+        return
 
-    if message.from_user:
-        telegram_id = message.from_user.id
-        htelegram_id = hash_telegram_id(telegram_id)
-        result = await mention_user(htelegram_id)
-        logger.debug("User mention result for telegram_id={}: {}", telegram_id, result)
+    telegram_id = message.from_user.id
+    htelegram_id = hash_telegram_id(telegram_id)
+    user = await mention_user(htelegram_id)
 
-    greeting = f"Привет, {hbold(user_name)}!"
-    await message.answer(greeting)
+    is_new = user.message is not None
+    logger.info(f"User mentioned: htelegram_id={htelegram_id[:8]}, new={is_new}")
+
+    text, keyboard = format_start_message(user, htelegram_id)
+    await message.answer(text, reply_markup=keyboard)
