@@ -47,17 +47,37 @@ async def check_task_status_periodically(
     if not track_id:
         track_id = task_data.get("track_id") or ""
 
-    if is_inline:
-        await handle_inline_audio_message(
-            bot, file_path, filename, message_id, settings.TEMP_FILE_CHANNEL, track_id
-        )
-    elif chat_id and message_id:
-        await handle_regular_audio_message(bot, file_path, filename, chat_id, message_id)
-    else:
-        logger.warning(
-            "Cannot edit message: chat_id={chat_id}, message_id={message_id}",
-            chat_id=chat_id,
-            message_id=message_id,
-        )
+    # Get thumbnail for audio file
+    from thatsoundbot.utils.thumbnail import get_thumbnail_from_mp3, get_thumbnail_from_url
 
-    file_path.unlink()
+    thumbnail = await get_thumbnail_from_mp3(file_path)
+    if not thumbnail:
+        album_cover_url = task_data.get("album_cover_url")
+        if album_cover_url:
+            thumbnail = await get_thumbnail_from_url(album_cover_url)
+
+    try:
+        if is_inline:
+            await handle_inline_audio_message(
+                bot, file_path, filename, message_id, settings.TEMP_FILE_CHANNEL, track_id, thumbnail
+            )
+            logger.info(
+                "File replaced in inline message, stopping status checks: task_id={task_id}, htelegram_id={htelegram_id_short}",
+                task_id=task_id,
+                htelegram_id_short=htelegram_id_short,
+            )
+        elif chat_id and message_id:
+            await handle_regular_audio_message(bot, file_path, filename, chat_id, message_id, thumbnail)
+            logger.info(
+                "File replaced in regular message, stopping status checks: task_id={task_id}, htelegram_id={htelegram_id_short}",
+                task_id=task_id,
+                htelegram_id_short=htelegram_id_short,
+            )
+        else:
+            logger.warning(
+                "Cannot edit message: chat_id={chat_id}, message_id={message_id}",
+                chat_id=chat_id,
+                message_id=message_id,
+            )
+    finally:
+        file_path.unlink()
