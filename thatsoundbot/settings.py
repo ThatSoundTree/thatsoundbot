@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import TypedDict
 
-from pydantic import SecretStr
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -17,10 +17,10 @@ class Settings(BaseSettings):
 
     TOKEN: SecretStr
     API_URL: str
-    SECRET_KEY: SecretStr
-    API_KEY: SecretStr
+    HASH_SECRET_KEY: SecretStr = Field(description="Secret key for hashing telegram_id to htelegram_id")
+    API_SECRET_KEY: SecretStr = Field(description="Secret key for authentication with main API service (thatsoundapi)")
     DIRECT_API_URL: str
-    TSDIRECT_SECRET_KEY: SecretStr
+    DIRECT_API_SECRET_KEY: SecretStr = Field(description="Secret key (Bearer token) for authentication with tasks API service (thatsounddirect)")
     TASK_STATUS_CHECK_INTERVAL: int = 10
     TEMP_FILE_CHANNEL: str
 

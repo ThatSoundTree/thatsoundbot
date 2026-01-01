@@ -11,7 +11,7 @@ class TSDirectHTTPClient:
         """Get authorization headers with Bearer token."""
         settings = get_settings()
         return {
-            "Authorization": f"Bearer {settings.TSDIRECT_SECRET_KEY.get_secret_value()}",
+            "Authorization": f"Bearer {settings.DIRECT_API_SECRET_KEY.get_secret_value()}",
         }
 
     @staticmethod

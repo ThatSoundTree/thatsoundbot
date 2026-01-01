@@ -11,7 +11,7 @@ class APIClient:
 
     def __init__(self, settings: Settings) -> None:
         self.base_url = settings.API_URL.rstrip("/")
-        self.api_key = settings.API_KEY.get_secret_value()
+        self.api_key = settings.API_SECRET_KEY.get_secret_value()
         self._client: httpx.AsyncClient | None = None
 
     async def __aenter__(self) -> "APIClient":
