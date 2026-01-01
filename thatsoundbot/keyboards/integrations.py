@@ -27,7 +27,7 @@ def create_integrations_keyboard(
         else:
             button_text = f"{display_name}: подключить"
             connect_url = integration_config["connect_url_template"].format(
-                api_url=settings.API_URL, htelegram_id=htelegram_id
+                api_public_url=settings.API_PUBLIC_URL, htelegram_id=htelegram_id
             )
             buttons.append([InlineKeyboardButton(text=button_text, url=connect_url)])
 
@@ -84,7 +84,7 @@ def update_integrations_keyboard(
                             for integration_config in get_integrations():
                                 if integration_config["name"] == integration_name:
                                     connect_url = integration_config["connect_url_template"].format(
-                                        api_url=settings.API_URL, htelegram_id=htelegram_id
+                                        api_public_url=settings.API_PUBLIC_URL, htelegram_id=htelegram_id
                                     )
                                     break
 
@@ -101,7 +101,7 @@ def update_integrations_keyboard(
                 for integration_config in get_integrations():
                     connect_url_template = integration_config["connect_url_template"]
                     expected_url = connect_url_template.format(
-                        api_url=settings.API_URL, htelegram_id=htelegram_id
+                        api_public_url=settings.API_PUBLIC_URL, htelegram_id=htelegram_id
                     )
                     if button.url == expected_url:
                         integration_name = integration_config["name"]

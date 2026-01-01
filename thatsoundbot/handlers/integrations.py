@@ -73,7 +73,7 @@ async def refresh_status_handler(callback: CallbackQuery) -> None:
                 elif button.url:
                     for integration_config in get_integrations():
                         expected_url = integration_config["connect_url_template"].format(
-                            api_url=settings.API_URL, htelegram_id=htelegram_id
+                            api_public_url=settings.API_PUBLIC_URL, htelegram_id=htelegram_id
                         )
                         if button.url == expected_url:
                             old_integrations_status[integration_config["name"]] = False

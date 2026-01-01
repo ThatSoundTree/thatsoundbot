@@ -17,6 +17,7 @@ class Settings(BaseSettings):
 
     TOKEN: SecretStr
     API_URL: str
+    API_PUBLIC_URL: str = Field(description="Public URL for backend API (used in inline buttons)")
     HASH_SECRET_KEY: SecretStr = Field(description="Secret key for hashing telegram_id to htelegram_id")
     API_SECRET_KEY: SecretStr = Field(description="Secret key for authentication with main API service (thatsoundapi)")
     DIRECT_API_URL: str
@@ -40,6 +41,6 @@ def get_integrations() -> list[IntegrationConfig]:
     return [
         {
             "name": "spotify",
-            "connect_url_template": "{api_url}/api/v1/spotify/login/{htelegram_id}",
+            "connect_url_template": "{api_public_url}/api/v1/spotify/login/{htelegram_id}",
         }
     ]
