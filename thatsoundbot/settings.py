@@ -18,10 +18,10 @@ class Settings(BaseSettings):
     TOKEN: SecretStr
     API_URL: str
     API_PUBLIC_URL: str = Field(description="Public URL for backend API (used in inline buttons)")
-    HASH_SECRET_KEY: SecretStr = Field(description="Secret key for hashing telegram_id to htelegram_id")
-    API_SECRET_KEY: SecretStr = Field(description="Secret key for authentication with main API service (thatsoundapi)")
+    TELEGRAM_HASH_KEY: SecretStr = Field(description="Secret key for hashing telegram_id to htelegram_id")
+    TO_API_AUTH_KEY: SecretStr = Field(description="Auth key for authentication with thatsoundapi (sent as X-API-Key header)")
     DIRECT_API_URL: str
-    DIRECT_API_SECRET_KEY: SecretStr = Field(description="Secret key (Bearer token) for authentication with tasks API service (thatsounddirect)")
+    TO_DIRECT_AUTH_KEY: SecretStr = Field(description="Auth key (Bearer token) for authentication with thatsounddirect API")
     TASK_STATUS_CHECK_INTERVAL: int = 10
     TEMP_FILE_CHANNEL: str
 
