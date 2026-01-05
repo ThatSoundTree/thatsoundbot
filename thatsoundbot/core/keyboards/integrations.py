@@ -1,7 +1,7 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from thatsoundbot.handlers.messages.texts import TEXTS
-from thatsoundbot.models import User
+from thatsoundbot.core.handlers.messages.texts import TEXTS
+from thatsoundbot.core.models import User
 from thatsoundbot.settings import get_integrations, get_settings
 
 

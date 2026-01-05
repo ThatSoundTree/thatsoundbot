@@ -3,6 +3,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 
 from thatsoundbot.settings import Settings
+from thatsoundbot.core.langs.middleware import PipelineMiddleware
 
 
 def create_bot(settings: Settings) -> Bot:
@@ -14,5 +15,12 @@ def create_bot(settings: Settings) -> Bot:
 
 
 def create_dispatcher() -> Dispatcher:
-    """Creates dispatcher instance."""
-    return Dispatcher()
+    """Creates dispatcher instance with pipeline middleware."""
+    dp = Dispatcher()
+
+    dp.message.middleware(PipelineMiddleware())
+    dp.callback_query.middleware(PipelineMiddleware())
+    dp.inline_query.middleware(PipelineMiddleware())
+    dp.chosen_inline_result.middleware(PipelineMiddleware())
+    
+    return dp

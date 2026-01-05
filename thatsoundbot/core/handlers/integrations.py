@@ -1,8 +1,8 @@
 from aiogram import F, Router
 from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
 
-from thatsoundbot.handlers.messages.texts import TEXTS
-from thatsoundbot.keyboards.integrations import update_integrations_keyboard
+from thatsoundbot.core.handlers.messages.texts import TEXTS
+from thatsoundbot.core.keyboards.integrations import update_integrations_keyboard
 from thatsoundbot.repositories.users import mention_user
 from thatsoundbot.settings import get_integrations, get_settings
 from thatsoundbot.utils.hashing import hash_telegram_id

@@ -2,8 +2,7 @@ from aiogram import F, Router
 from aiogram.types import CallbackQuery, ChosenInlineResult, InlineQuery, Message
 from loguru import logger
 
-from thatsoundbot.handlers.messages.texts import TEXTS
-from thatsoundbot.keyboards.inline import create_error_result, create_inline_result
+from thatsoundbot.core.keyboards.inline import create_error_result, create_inline_result
 from thatsoundbot.repositories.sounds import get_recent_tracks
 from thatsoundbot.services.inline import (
     create_track_download_task,

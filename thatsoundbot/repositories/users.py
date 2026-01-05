@@ -1,5 +1,5 @@
 from thatsoundbot.backend.client import APIClient
-from thatsoundbot.models import User
+from thatsoundbot.core.models import User
 from thatsoundbot.settings import get_settings
 
 

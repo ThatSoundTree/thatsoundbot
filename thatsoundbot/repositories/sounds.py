@@ -1,5 +1,5 @@
 from thatsoundbot.backend.client import APIClient
-from thatsoundbot.models import RecentTracksResponse
+from thatsoundbot.core.models import RecentTracksResponse
 from thatsoundbot.settings import get_settings
 
 

@@ -2,9 +2,10 @@ from aiogram.types import InlineQueryResultArticle
 from httpx import HTTPStatusError
 from loguru import logger
 
-from thatsoundbot.handlers.messages.texts import TEXTS
-from thatsoundbot.keyboards.inline import create_error_result
-from thatsoundbot.models import SpotifyTrack
+from thatsoundbot.core.handlers.messages.texts import TEXTS
+from thatsoundbot.core.keyboards.inline import create_error_result
+
+from thatsoundbot.core.models import SpotifyTrack
 from thatsoundbot.repositories.downloads import create_download_task
 from thatsoundbot.repositories.sounds import get_recent_tracks
 

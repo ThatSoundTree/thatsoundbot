@@ -3,10 +3,10 @@ import asyncio
 from aiogram import Bot
 from loguru import logger
 
-from thatsoundbot.models import SpotifyTrack
+from thatsoundbot.core.models import SpotifyTrack
 from thatsoundbot.services.task_status_checker import check_task_status_periodically
 from thatsoundbot.settings import get_settings
-from thatsoundbot.utils.http_client import TSDirectHTTPClient
+from thatsoundbot.utils.http_client2 import TSDirectHTTPClient
 
 
 async def create_download_task(

@@ -1,8 +1,8 @@
 from aiogram.types import InlineKeyboardMarkup
 
-from thatsoundbot.handlers.messages.texts import TEXTS
-from thatsoundbot.keyboards.integrations import create_integrations_keyboard
-from thatsoundbot.models import User
+from thatsoundbot.core.handlers.messages.texts import TEXTS
+# from thatsoundbot.core.keyboards.integrations import create_integrations_keyboard
+from thatsoundbot.core.models import User
 
 
 def format_start_message(

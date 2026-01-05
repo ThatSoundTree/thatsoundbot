@@ -5,7 +5,7 @@ from aiogram.types import (
     InputTextMessageContent,
 )
 
-from thatsoundbot.models import SpotifyTrack
+from thatsoundbot.core.models import SpotifyTrack
 
 
 def create_inline_result(track: SpotifyTrack, index: int) -> InlineQueryResultArticle:

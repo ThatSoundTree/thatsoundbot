@@ -1,7 +1,7 @@
 from aiogram import Bot
 from loguru import logger
 
-from thatsoundbot.handlers.messages.audio import (
+from thatsoundbot.core.handlers.messages.audio import (
     handle_inline_audio_message,
     handle_regular_audio_message,
 )

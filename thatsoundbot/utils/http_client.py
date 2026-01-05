@@ -1,39 +1,35 @@
+from enum import StrEnum
+from typing import Any
+
 import httpx
+from loguru import logger
 
-from thatsoundbot.settings import get_settings
+
+class MethodEnum(StrEnum):
+    GET = "GET"
+    POST = "POST"
 
 
-class TSDirectHTTPClient:
-    """HTTP client for making authenticated requests to TSDirect API with Bearer token."""
-
-    @staticmethod
-    def _get_auth_headers() -> dict[str, str]:
-        """Get authorization headers with Bearer token."""
-        settings = get_settings()
-        return {
-            "Authorization": f"Bearer {settings.TO_DIRECT_AUTH_KEY.get_secret_value()}",
-        }
+class HttpClient:
 
     @staticmethod
-    async def post(url: str, **kwargs) -> httpx.Response:
-        """Make authenticated POST request to TSDirect API."""
-        headers = TSDirectHTTPClient._get_auth_headers()
-        if "headers" in kwargs:
-            headers.update(kwargs["headers"])
-        kwargs["headers"] = headers
+    async def __any_method(method: MethodEnum, url: str, **kwargs: Any) -> httpx.Response:
+        logger.debug("{method} {url}", method=method, url=url)
 
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(url, **kwargs)
-            return response
+        async with httpx.AsyncClient() as client:
+            if method == MethodEnum.GET:
+                response = await client.get(url, **kwargs)
+            elif method == MethodEnum.POST:
+                response = await client.post(url, **kwargs)
+            else:
+                raise NotImplementedError
+
+        return response
 
     @staticmethod
-    async def get(url: str, **kwargs) -> httpx.Response:
-        """Make authenticated GET request to TSDirect API."""
-        headers = TSDirectHTTPClient._get_auth_headers()
-        if "headers" in kwargs:
-            headers.update(kwargs["headers"])
-        kwargs["headers"] = headers
+    async def get(url: str, **kwargs: Any) -> httpx.Response:
+        return await HttpClient.__any_method(method=MethodEnum.GET, url=url, **kwargs)
 
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(url, **kwargs)
-            return response
+    @staticmethod
+    async def post(url: str, **kwargs: Any) -> httpx.Response:
+        return await HttpClient.__any_method(method=MethodEnum.POST, url=url, **kwargs)

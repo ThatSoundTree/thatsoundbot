@@ -4,7 +4,7 @@ from tempfile import gettempdir
 
 from loguru import logger
 
-from thatsoundbot.utils.http_client import TSDirectHTTPClient
+from thatsoundbot.utils.http_client2 import TSDirectHTTPClient
 
 
 async def wait_for_task_ready(
