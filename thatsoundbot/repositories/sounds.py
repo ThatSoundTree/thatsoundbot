@@ -3,7 +3,7 @@ from thatsoundbot.core.models import RecentTracksResponse
 from thatsoundbot.settings import get_settings
 
 
-async def get_recent_tracks(htelegram_id: str) -> RecentTracksResponse:
+async def get_recent_tracks(hgramid: str) -> RecentTracksResponse:
     """Get recently played tracks for user."""
     settings = get_settings()
     async with APIClient(settings) as client:

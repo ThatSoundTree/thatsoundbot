@@ -1,17 +1,16 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from loguru import logger
 
 from thatsoundbot.core.handlers.messages.texts import TEXTS
 from thatsoundbot.core.models import User
 from thatsoundbot.models.pipelines_view import PipelineView, IntegrationsView
-from thatsoundbot.settings import get_integrations, get_settings, get_tsapi_settings, get_pipelines
+from thatsoundbot.settings import get_integrations, get_settings, get_tsapi_settings
 
 
 def create_integrate_button(service_name: str, is_connected: bool, auth_url: str, integration_pipelines: IntegrationsView) -> list[InlineKeyboardButton]:
     template_text = "{service}: {status}"
     if is_connected:
         return [
-            InlineKeyboardButton(text=template_text.format(service=service_name.capitalize(), status=integration_pipelines.connected), callback_data=f"integration:connected")
+            InlineKeyboardButton(text=template_text.format(service=service_name.capitalize(), status=integration_pipelines.connected), callback_data="integration:connected")
         ]
 
     else:

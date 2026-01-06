@@ -29,6 +29,8 @@ class Settings(BaseSettings):
     TEMP_FILE_CHANNEL: str
     PIPELINES_PATH: str = Field(default="pipelines.json", description="Path to pipelines.json file")
 
+    LOGS_CHANNEL_URL: str
+
     model_config = SettingsConfigDict(
         env_file=".env", case_sensitive=False, extra="ignore", env_prefix="TELEGRAM_BOT_"
     )

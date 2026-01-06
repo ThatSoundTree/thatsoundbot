@@ -1,23 +1,20 @@
 from aiogram.enums import ParseMode
-from loguru import logger
 
 from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
 
-from thatsoundbot.core.handlers.messages import format_start_message
 from thatsoundbot.core.keyboards.integrations import prepare_integrate_keyboard
 from thatsoundbot.models.pipelines_view import PipelineView
-from thatsoundbot.repositories.users import mention_user
 from thatsoundbot.services.integrations import get_user_integrations
-from thatsoundbot.utils.hashing import hash_telegram_id
 
-router = Router(name="start")
+
+router = Router(name="integrations")
 
 
 @router.message(Command("start"))
 async def start_handler(message: Message, hgramid: str, pipeline: PipelineView) -> None:
-    """Handles the /start command for greeting."""
+    """Handles the start menu."""
     integrations = await get_user_integrations(hgramid=hgramid)
 
     keyboard = prepare_integrate_keyboard(hgramid=hgramid, integrations=integrations, pipeline=pipeline)
@@ -34,7 +31,7 @@ async def refresh_status_handler(callback: CallbackQuery, hgramid: str, pipeline
     if old_keyboard.model_dump_json() == keyboard.model_dump_json():
         await callback.answer()
         return
-    
+
     await callback.message.edit_reply_markup(reply_markup=keyboard)
     await callback.answer()
 
@@ -43,4 +40,3 @@ async def refresh_status_handler(callback: CallbackQuery, hgramid: str, pipeline
 async def integration_callback_handler(callback: CallbackQuery, hgramid: str, pipeline: PipelineView) -> None:
     """Handle integration button callbacks."""
     await callback.answer(pipeline.integrations.already_connected, show_alert=True)
-

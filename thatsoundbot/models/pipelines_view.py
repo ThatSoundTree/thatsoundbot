@@ -7,11 +7,19 @@ class IntegrationsView(BaseModel):
     refresh_button_text: str
     already_connected: str
 
+
+class TracksPipelineView(BaseModel):
+    empty_title: str
+    empty_inline_text: str
+    channel_ad_text: str
+
+
 class PipelineView(BaseModel):
     """Pydantic model that implements selected language in pipeline.json"""
 
     welcome_message: str
     integrations: IntegrationsView
+    tracks: TracksPipelineView
 
 
 class PipelinesView(BaseModel):
