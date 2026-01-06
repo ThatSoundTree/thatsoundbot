@@ -1,6 +1,7 @@
-from aiogram.types import InlineQueryResultArticle, InputTextMessageContent
+from aiogram.types import InlineQueryResultArticle, InputTextMessageContent, InlineKeyboardMarkup, InlineKeyboardButton
 
 from thatsoundbot.models.pipelines_view import TracksPipelineView
+from thatsoundbot.models.tsapi import TrackView
 from thatsoundbot.settings import get_settings
 
 
@@ -23,3 +24,36 @@ def create_channel_ad_query_result(tracks_pipeline: TracksPipelineView) -> Inlin
             message_text=tracks_pipeline.empty_inline_text
         )
     )
+
+
+def empty_inline_result(tracks_pipeline: TracksPipelineView) -> list[InlineQueryResultArticle]:
+    return [
+        create_empty_tracks_article(tracks_pipeline=tracks_pipeline),
+        create_channel_ad_query_result(tracks_pipeline=tracks_pipeline),
+    ]
+
+
+def create_loading_markup() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="⏳", callback_data="loading")]
+        ]
+    )
+
+
+def create_track_item(track: TrackView, tracks_pipeline: TracksPipelineView) -> InlineQueryResultArticle:
+
+    result = InlineQueryResultArticle(
+        id=f"track_{track.id}",
+        title=track.name,
+        description=", ".join(track.artists) if track.artists else "Unknown Artist",
+        input_message_content=InputTextMessageContent(
+            message_text=tracks_pipeline.loading_text,
+        ),
+        reply_markup=create_loading_markup(),
+    )
+
+    if track.album_cover_url:
+        result.thumbnail_url = track.album_cover_url
+
+    return result

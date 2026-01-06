@@ -12,6 +12,7 @@ class TracksPipelineView(BaseModel):
     empty_title: str
     empty_inline_text: str
     channel_ad_text: str
+    loading_text: str
 
 
 class PipelineView(BaseModel):
