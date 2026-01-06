@@ -5,6 +5,7 @@ class IntegrationsView(BaseModel):
     connected: str
     disconnected: str
     refresh_button_text: str
+    already_connected: str
 
 class PipelineView(BaseModel):
     """Pydantic model that implements selected language in pipeline.json"""

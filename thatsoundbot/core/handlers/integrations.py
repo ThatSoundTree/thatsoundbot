@@ -37,3 +37,10 @@ async def refresh_status_handler(callback: CallbackQuery, hgramid: str, pipeline
     
     await callback.message.edit_reply_markup(reply_markup=keyboard)
     await callback.answer()
+
+
+@router.callback_query(F.data == "integration:connected")
+async def integration_callback_handler(callback: CallbackQuery, hgramid: str, pipeline: PipelineView) -> None:
+    """Handle integration button callbacks."""
+    await callback.answer(pipeline.integrations.already_connected, show_alert=True)
+

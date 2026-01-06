@@ -4,7 +4,8 @@
         "integrations": {
              "connected": "подключено",
             "disconnected": "не подключено",
-            "refresh_button_text": "Обновить"
+            "refresh_button_text": "Обновить",
+            "already_connected": "Уже подключено!"
         }
     }
 }
