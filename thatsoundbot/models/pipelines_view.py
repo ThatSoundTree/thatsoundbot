@@ -1,11 +1,16 @@
 from loguru import logger
 from pydantic import BaseModel
 
+class IntegrationsView(BaseModel):
+    connected: str
+    disconnected: str
+    refresh_button_text: str
 
 class PipelineView(BaseModel):
     """Pydantic model that implements selected language in pipeline.json"""
 
     welcome_message: str
+    integrations: IntegrationsView
 
 
 class PipelinesView(BaseModel):

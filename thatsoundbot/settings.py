@@ -38,9 +38,16 @@ class TSAPISettings(BaseSettings):
     BASE_URL: str
     AUTH_KEY: str
 
+    SPOTIFY_AUTH_TEMPLATE: str
+
     def get_header(self) -> dict:
         return {
             "Authorization": f"Bearer {self.AUTH_KEY}",
+        }
+
+    def get_auth_urls(self, hgramid: str):
+        return {
+            "spotify": self.SPOTIFY_AUTH_TEMPLATE.format(hgramid=hgramid),
         }
 
     model_config = SettingsConfigDict(

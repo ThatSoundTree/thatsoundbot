@@ -1,42 +1,52 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from loguru import logger
 
 from thatsoundbot.core.handlers.messages.texts import TEXTS
 from thatsoundbot.core.models import User
-from thatsoundbot.settings import get_integrations, get_settings
+from thatsoundbot.models.pipelines_view import PipelineView, IntegrationsView
+from thatsoundbot.settings import get_integrations, get_settings, get_tsapi_settings, get_pipelines
 
 
-def create_integrations_keyboard(
-    user: User, htelegram_id: str, refresh_button_loading: bool = False
-) -> InlineKeyboardMarkup:
-    """Create inline keyboard with integration buttons."""
-    buttons = []
-    integrations_data = user.integrations.model_dump()
-    settings = get_settings()
+def create_integrate_button(service_name: str, is_connected: bool, auth_url: str, integration_pipelines: IntegrationsView) -> list[InlineKeyboardButton]:
+    template_text = "{service}: {status}"
+    if is_connected:
+        return [
+            InlineKeyboardButton(text=template_text.format(service=service_name.capitalize(), status=integration_pipelines.connected), callback_data=f"integration:connected")
+        ]
 
-    for integration_config in get_integrations():
-        name = integration_config["name"]
-        if name not in integrations_data:
-            continue
-
-        enabled = integrations_data[name]
-        display_name = integration_config["name"].capitalize()
-
-        if enabled:
-            button_text = f"{display_name}: подключено"
-            buttons.append([InlineKeyboardButton(text=button_text, callback_data=f"integration:{name}:connected")])
-        else:
-            button_text = f"{display_name}: подключить"
-            connect_url = integration_config["connect_url_template"].format(
-                api_public_url=settings.API_PUBLIC_URL, htelegram_id=htelegram_id
+    else:
+        return [
+            InlineKeyboardButton(
+                text=template_text.format(service=service_name.capitalize(), status=integration_pipelines.disconnected), url=auth_url
             )
-            buttons.append([InlineKeyboardButton(text=button_text, url=connect_url)])
+        ]
 
-    refresh_text = (
-        TEXTS["integrations"]["refresh_button_loading"]
-        if refresh_button_loading
-        else TEXTS["integrations"]["refresh_button"]
+
+def prepare_integrate_keyboard(hgramid: str, integrations: dict[str, bool], pipeline: PipelineView) -> InlineKeyboardMarkup:
+    """Create inline keyboard with integration buttons."""
+    tsapi_settings = get_tsapi_settings()
+    integration_pipelines = pipeline.integrations
+    auth_urls = tsapi_settings.get_auth_urls(hgramid=hgramid)
+
+    buttons = []
+    for service_name, is_connected in integrations.items():
+        buttons.append(
+            create_integrate_button(
+                service_name=service_name,
+                is_connected=is_connected,
+                auth_url=auth_urls[service_name],
+                integration_pipelines=integration_pipelines
+            )
+        )
+
+    buttons.append(
+        [
+            InlineKeyboardButton(
+                text=integration_pipelines.refresh_button_text,
+                callback_data="refresh_status"
+            )
+        ]
     )
-    buttons.append([InlineKeyboardButton(text=refresh_text, callback_data="refresh_status")])
 
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
