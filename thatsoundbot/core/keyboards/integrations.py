@@ -43,7 +43,7 @@ def prepare_integrate_keyboard(hgramid: str, integrations: dict[str, bool], pipe
         [
             InlineKeyboardButton(
                 text=integration_pipelines.refresh_button_text,
-                callback_data="refresh_status"
+                callback_data="integration:refresh",
             )
         ]
     )
