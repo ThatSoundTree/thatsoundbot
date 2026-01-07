@@ -5,7 +5,7 @@ from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery
 
 from thatsoundbot.core.keyboards.integrations import prepare_integrate_keyboard
-from thatsoundbot.models.pipelines_view import PipelineView
+from thatsoundbot.core.models.pipelines_view import PipelineView
 from thatsoundbot.services.integrations import get_user_integrations
 
 
@@ -24,11 +24,15 @@ async def start_handler(message: Message, hgramid: str, pipeline: PipelineView) 
 @router.callback_query(F.data == "integration:refresh")
 async def refresh_status_handler(callback: CallbackQuery, hgramid: str, pipeline: PipelineView) -> None:
     """Handle refresh status button callback."""
+    if not callback.message or not isinstance(callback.message, Message):
+        await callback.answer()
+        return
+
     integrations = await get_user_integrations(hgramid=hgramid)
     old_keyboard = callback.message.reply_markup
     keyboard = prepare_integrate_keyboard(hgramid=hgramid, integrations=integrations, pipeline=pipeline)
 
-    if old_keyboard.model_dump_json() == keyboard.model_dump_json():
+    if old_keyboard and old_keyboard.model_dump_json() == keyboard.model_dump_json():
         await callback.answer()
         return
 

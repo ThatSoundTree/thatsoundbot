@@ -22,5 +22,5 @@ def create_dispatcher() -> Dispatcher:
     dp.callback_query.middleware(PipelineMiddleware())
     dp.inline_query.middleware(PipelineMiddleware())
     dp.chosen_inline_result.middleware(PipelineMiddleware())
-    
+
     return dp

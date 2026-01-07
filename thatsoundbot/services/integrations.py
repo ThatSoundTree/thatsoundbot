@@ -13,7 +13,7 @@ async def get_user_integrations(hgramid: str) -> dict:
     )
 
     if response.status_code != 200:
-        logger.error(": [{hgramid}] [sound] failed to get integrations: {error_text}", hgramid=hgramid[:8], error_text=response.text[:200])
+        logger.error("[{hgramid}] [sound] failed to get integrations: {error_text}", hgramid=hgramid[:8], error_text=response.text[:200])
         return {}
 
     return response.json()

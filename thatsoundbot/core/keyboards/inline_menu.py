@@ -1,5 +1,5 @@
-from thatsoundbot.models.pipelines_view import TracksPipelineView
-from thatsoundbot.models.tsapi import TrackView
+from thatsoundbot.core.models.pipelines_view import TracksPipelineView
+from thatsoundbot.core.models.tsapi import TrackView
 from thatsoundbot.settings import get_settings
 from aiogram.types import (
     InlineQueryResultArticle,
