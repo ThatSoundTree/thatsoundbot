@@ -1,11 +1,16 @@
-from aiogram.types import InlineQueryResultArticle, InputTextMessageContent, InlineKeyboardMarkup, InlineKeyboardButton
-
 from thatsoundbot.models.pipelines_view import TracksPipelineView
 from thatsoundbot.models.tsapi import TrackView
 from thatsoundbot.settings import get_settings
+from aiogram.types import (
+    InlineQueryResultArticle,
+    InputTextMessageContent,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton,
+)
 
 
-def create_empty_tracks_article(tracks_pipeline: TracksPipelineView) -> InlineQueryResultArticle:
+
+def create_empty_tracks_article(tracks_pipeline) -> InlineQueryResultArticle:
     return InlineQueryResultArticle(
         id="error_no_results",
         title=tracks_pipeline.empty_title,
@@ -14,7 +19,8 @@ def create_empty_tracks_article(tracks_pipeline: TracksPipelineView) -> InlineQu
         ),
     )
 
-def create_channel_ad_query_result(tracks_pipeline: TracksPipelineView) -> InlineQueryResultArticle:
+
+def create_channel_ad_query_result(tracks_pipeline) -> InlineQueryResultArticle:
     settings = get_settings()
     return InlineQueryResultArticle(
         id="channel_ad",
@@ -22,14 +28,14 @@ def create_channel_ad_query_result(tracks_pipeline: TracksPipelineView) -> Inlin
         url=settings.LOGS_CHANNEL_URL,
         input_message_content=InputTextMessageContent(
             message_text=tracks_pipeline.empty_inline_text
-        )
+        ),
     )
 
 
-def empty_inline_result(tracks_pipeline: TracksPipelineView) -> list[InlineQueryResultArticle]:
+def empty_inline_result(tracks_pipeline) -> list[InlineQueryResultArticle]:
     return [
-        create_empty_tracks_article(tracks_pipeline=tracks_pipeline),
-        create_channel_ad_query_result(tracks_pipeline=tracks_pipeline),
+        create_empty_tracks_article(tracks_pipeline),
+        create_channel_ad_query_result(tracks_pipeline),
     ]
 
 
@@ -42,15 +48,14 @@ def create_loading_markup() -> InlineKeyboardMarkup:
 
 
 def create_track_item(track: TrackView, tracks_pipeline: TracksPipelineView) -> InlineQueryResultArticle:
-
     result = InlineQueryResultArticle(
-        id=f"track_{track.id}",
+        id=track.url,
         title=track.name,
         description=", ".join(track.artists) if track.artists else "Unknown Artist",
         input_message_content=InputTextMessageContent(
             message_text=tracks_pipeline.loading_text,
         ),
-        reply_markup=create_loading_markup(),
+        reply_markup=create_loading_markup()
     )
 
     if track.album_cover_url:

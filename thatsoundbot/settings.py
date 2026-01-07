@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     PIPELINES_PATH: str = Field(default="pipelines.json", description="Path to pipelines.json file")
 
     LOGS_CHANNEL_URL: str
+    USE_TSRIPPER: bool = Field(default=False)
 
     model_config = SettingsConfigDict(
         env_file=".env", case_sensitive=False, extra="ignore", env_prefix="TELEGRAM_BOT_"

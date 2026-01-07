@@ -6,7 +6,7 @@ from thatsoundbot.utils.http_client import HttpClient
 
 
 async def get_recent_tracks(hgramid: str) -> list[TrackView | None]:
-    logger.info("[{hgramid}] [sound] request tracks", hgramid=hgramid)
+    logger.info("[{hgramid}] [sound] request tracks", hgramid=hgramid[:8])
 
     tsapi_settings = get_tsapi_settings()
     response = await HttpClient.get(

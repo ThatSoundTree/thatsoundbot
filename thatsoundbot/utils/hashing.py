@@ -1,5 +1,7 @@
+import base64
 import hashlib
 import hmac
+import json
 
 from thatsoundbot.settings import get_settings
 

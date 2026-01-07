@@ -9,6 +9,7 @@ class TrackView(BaseModel):
     artists: list[str]
     album_cover_url: str | None = None
     played_at: str
+    url: str
 
 
 class RecentTracksView(BaseModel):
