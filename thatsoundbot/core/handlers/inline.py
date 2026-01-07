@@ -33,10 +33,15 @@ async def chosen_inline_result_handler(chosen_result: ChosenInlineResult) -> Non
     """Handle chosen inline result and send track text."""
     settings = get_settings()
 
-    if not settings.USE_TSRIPPER and chosen_result.bot:
-        await chosen_result.bot.edit_message_text(
+    bot = chosen_result.bot
+    if not settings.USE_TSRIPPER and bot:
+        track_url = chosen_result.result_id
+        if "_" in track_url:
+            track_url = track_url.split("_", 1)[1]
+
+        await bot.edit_message_text(
             inline_message_id=chosen_result.inline_message_id,
-            text=chosen_result.result_id,
+            text=track_url,
         )
 
 @router.callback_query(F.data == "loading")

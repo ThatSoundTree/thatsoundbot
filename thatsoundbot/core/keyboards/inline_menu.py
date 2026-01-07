@@ -48,8 +48,14 @@ def create_loading_markup() -> InlineKeyboardMarkup:
 
 
 def create_track_item(track: TrackView, tracks_pipeline: TracksPipelineView) -> InlineQueryResultArticle:
+    prefix = track.id[:6] if len(track.id) >= 6 else track.id
+    unique_id = f"{prefix}_{track.url}"
+    unique_id_bytes = unique_id.encode('utf-8')
+    if len(unique_id_bytes) > 64:
+        unique_id = unique_id_bytes[:64].decode('utf-8', errors='ignore')
+
     result = InlineQueryResultArticle(
-        id=track.url,
+        id=unique_id,
         title=track.name,
         description=", ".join(track.artists) if track.artists else "Unknown Artist",
         input_message_content=InputTextMessageContent(
