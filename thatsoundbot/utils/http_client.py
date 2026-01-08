@@ -1,5 +1,6 @@
 from enum import StrEnum
 from typing import Any
+from urllib.parse import urlparse
 
 import httpx
 from loguru import logger
@@ -33,3 +34,8 @@ class HttpClient:
     @staticmethod
     async def post(url: str, **kwargs: Any) -> httpx.Response:
         return await HttpClient.__any_method(method=MethodEnum.POST, url=url, **kwargs)
+
+
+def extract_domain(url: str) -> str:
+    parsed_url = urlparse(url)
+    return parsed_url.netloc
