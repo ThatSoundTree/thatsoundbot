@@ -1,3 +1,6 @@
+import random
+import string
+
 from thatsoundbot.core.models.pipelines_view import TracksPipelineView
 from thatsoundbot.core.models.tsapi import TrackView
 from thatsoundbot.settings import get_settings
@@ -12,8 +15,10 @@ from thatsoundbot.utils.http_client import extract_domain
 
 
 def create_empty_tracks_article(tracks_pipeline) -> InlineQueryResultArticle:
+    characters = string.ascii_letters + string.digits
+    random_string = ''.join(random.choices(characters, k=15))
     return InlineQueryResultArticle(
-        id="error_no_results",
+        id=random_string,
         title=tracks_pipeline.empty_title,
         input_message_content=InputTextMessageContent(
             message_text=tracks_pipeline.empty_inline_text

@@ -43,7 +43,7 @@ async def chosen_inline_result_handler(chosen_result: ChosenInlineResult) -> Non
     settings = get_settings()
 
     bot = chosen_result.bot
-    if not settings.USE_TSRIPPER and bot:
+    if not settings.USE_TSRIPPER and bot and chosen_result.inline_message_id:
         track_url = chosen_result.result_id
         if "_" in track_url:
             track_url = track_url.split("_", 1)[1]
