@@ -8,6 +8,7 @@ from aiogram.types import (
     InlineKeyboardButton,
 )
 
+from thatsoundbot.utils.http_client import extract_domain
 
 
 def create_empty_tracks_article(tracks_pipeline) -> InlineQueryResultArticle:
@@ -61,7 +62,8 @@ def create_track_item(track: TrackView, tracks_pipeline: TracksPipelineView) -> 
         input_message_content=InputTextMessageContent(
             message_text=tracks_pipeline.loading_text,
         ),
-        reply_markup=create_loading_markup()
+        reply_markup=create_loading_markup(),
+        url=extract_domain(track.url),
     )
 
     if track.album_cover_url:

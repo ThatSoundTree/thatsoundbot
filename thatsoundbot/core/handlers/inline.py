@@ -16,15 +16,24 @@ async def inline_query_handler(inline_query: InlineQuery, hgramid: str, pipeline
     logger.info("[{hgramid}] [inline] init", hgramid=hgramid[:8])
 
     tracks = await get_recent_tracks(hgramid=hgramid)
-    if not tracks:
+    if not (tracks.yandex_music or tracks.spotify):
         logger.warning("[{hgramid}] [inline] empty tracks", hgramid=hgramid[:8])
         results = empty_inline_result(tracks_pipeline=pipeline.tracks)
         await inline_query.answer(results=results, cache_time=5)  # type: ignore[arg-type]
         return
 
-    results = [create_track_item(track=track, tracks_pipeline=pipeline.tracks) for track in tracks]
-    logger.info("[{hgramid}] [inline] len(results) == {len_results}", hgramid=hgramid[:8], len_results=len(results))
+    results = []
+    spotify_items = [create_track_item(track=track, tracks_pipeline=pipeline.tracks) for track in tracks.spotify]
+    yandex_music_items = [create_track_item(track=track, tracks_pipeline=pipeline.tracks) for track in tracks.yandex_music]
 
+
+    logger.info(
+        "[{hgramid}] [inline] prepared yandex_music={len_yandex} and spotify={len_spotify}",
+        hgramid=hgramid[:8], len_yandex=len(yandex_music_items),
+        len_spotify=len(spotify_items)
+    )
+    results.extend(spotify_items)
+    results.extend(yandex_music_items)
     await inline_query.answer(results=results, cache_time=3)  # type: ignore[arg-type]
 
 

@@ -1,10 +1,18 @@
 import asyncio
-
+import os
+import sys
 from loguru import logger
 
 from thatsoundbot.core import create_bot, create_dispatcher
 from thatsoundbot.core.handlers import inline_router, integrations_router
 from thatsoundbot.settings import get_settings
+
+
+
+log_level = os.getenv("TELEGRAM_BOT_LOG_LEVEL", "INFO")
+logger.remove()
+logger.add(sys.stderr, level=log_level)
+
 
 
 async def main() -> None:

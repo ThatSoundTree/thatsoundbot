@@ -18,6 +18,8 @@ class IntegrationConfig(TypedDict):
 class Settings(BaseSettings):
     """Telegram bot application settings"""
 
+    LOG_LEVEL: str = "INFO"
+
     TOKEN: SecretStr
     HASH_KEY: SecretStr = Field(description="Secret key for hashing telegram_id to htelegram_id")
     PIPELINES_PATH: str = Field(default="pipelines.json", description="Path to pipelines.json file")
@@ -36,6 +38,7 @@ class TSAPISettings(BaseSettings):
     AUTH_KEY: str
 
     SPOTIFY_AUTH_TEMPLATE: str
+    YANDEX_AUTH_TEMPLATE: str
 
     def get_header(self) -> dict:
         return {
@@ -45,6 +48,7 @@ class TSAPISettings(BaseSettings):
     def get_auth_urls(self, hgramid: str):
         return {
             "spotify": self.SPOTIFY_AUTH_TEMPLATE.format(hgramid=hgramid),
+            "YandexMusic": self.YANDEX_AUTH_TEMPLATE.format(hgramid=hgramid),
         }
 
     model_config = SettingsConfigDict(
