@@ -53,12 +53,8 @@ def create_loading_markup() -> InlineKeyboardMarkup:
     )
 
 
-def create_track_item(track: TrackView, tracks_pipeline: TracksPipelineView) -> InlineQueryResultArticle:
-    prefix = track.id[:6] if len(track.id) >= 6 else track.id
-    unique_id = f"{prefix}_{track.url}"
-    unique_id_bytes = unique_id.encode('utf-8')
-    if len(unique_id_bytes) > 64:
-        unique_id = unique_id_bytes[:64].decode('utf-8', errors='ignore')
+def create_track_item(track: TrackView, tracks_pipeline: TracksPipelineView, inline_query_id: str) -> InlineQueryResultArticle:
+    unique_id = f"{inline_query_id[:6]}_{track.url}"
 
     result = InlineQueryResultArticle(
         id=unique_id,

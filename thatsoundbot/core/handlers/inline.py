@@ -23,8 +23,8 @@ async def inline_query_handler(inline_query: InlineQuery, hgramid: str, pipeline
         return
 
     results = []
-    spotify_items = [create_track_item(track=track, tracks_pipeline=pipeline.tracks) for track in tracks.spotify]
-    yandex_music_items = [create_track_item(track=track, tracks_pipeline=pipeline.tracks) for track in tracks.yandex_music]
+    spotify_items = [create_track_item(track=track, tracks_pipeline=pipeline.tracks, inline_query_id=inline_query.id) for track in tracks.spotify]
+    yandex_music_items = [create_track_item(track=track, tracks_pipeline=pipeline.tracks, inline_query_id=inline_query.id) for track in tracks.yandex_music]
 
 
     logger.info(
