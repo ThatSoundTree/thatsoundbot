@@ -18,6 +18,8 @@ class IntegrationConfig(TypedDict):
 class Settings(BaseSettings):
     """Telegram bot application settings"""
 
+    LOG_LEVEL: str = "INFO"
+
     TOKEN: SecretStr
     HASH_KEY: SecretStr = Field(description="Secret key for hashing telegram_id to htelegram_id")
     PIPELINES_PATH: str = Field(default="pipelines.json", description="Path to pipelines.json file")
