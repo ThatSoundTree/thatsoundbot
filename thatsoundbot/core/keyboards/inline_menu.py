@@ -55,7 +55,7 @@ def create_loading_markup() -> InlineKeyboardMarkup:
 
 def create_track_item(track: TrackView, tracks_pipeline: TracksPipelineView, inline_query_id: str) -> InlineQueryResultArticle:
     unique_id = f"{inline_query_id[:6]}_{track.url}"
-    print("DEBUG BRUH", unique_id)
+
     result = InlineQueryResultArticle(
         id=unique_id,
         title=track.name,
