@@ -10,7 +10,7 @@ def create_bot(settings: Settings) -> Bot:
     """Creates and configures bot instance."""
     return Bot(
         token=settings.TOKEN.get_secret_value(),
-        default=DefaultBotProperties(parse_mode=ParseMode.HTML),
+        default=DefaultBotProperties()
     )
 
 

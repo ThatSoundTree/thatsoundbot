@@ -1,4 +1,5 @@
 import json
+from enum import Enum
 from functools import lru_cache
 from typing import TypedDict
 
@@ -25,7 +26,8 @@ class Settings(BaseSettings):
     PIPELINES_PATH: str = Field(default="pipelines.json", description="Path to pipelines.json file")
 
     LOGS_CHANNEL_URL: str
-    USE_TSRIPPER: bool = Field(default=False)
+    CACHE_CHANNEL: str
+
 
     model_config = SettingsConfigDict(
         env_file=".env", case_sensitive=False, extra="ignore", env_prefix="TELEGRAM_BOT_"
@@ -51,8 +53,23 @@ class TSAPISettings(BaseSettings):
             "YandexMusic": self.YANDEX_AUTH_TEMPLATE.format(hgramid=hgramid),
         }
 
+    class Providers(Enum):
+        Spotify = 1
+        YandexMusic = 2
+
     model_config = SettingsConfigDict(
         env_file=".env", case_sensitive=False, extra="ignore", env_prefix="TSAPI_"
+    )
+
+class TSRipperSettings(BaseSettings):
+    """Something in the way."""
+
+    BASE_URL: str
+    IN_USE: bool = Field(default=False)
+    SCROBBLE_SLEEP_TIME: int = Field(default=3)
+
+    model_config = SettingsConfigDict(
+        env_file=".env", case_sensitive=False, extra="ignore", env_prefix="TSRIPPER_"
     )
 
 
@@ -66,6 +83,10 @@ def get_settings() -> Settings:
 def get_tsapi_settings() -> TSAPISettings:
     return TSAPISettings()  # type: ignore[call-arg]
 
+
+@lru_cache()
+def get_tsripper_settings() -> TSRipperSettings:
+    return TSRipperSettings()  # type: ignore[call-arg]
 
 @lru_cache()
 def get_pipelines() -> PipelinesView:
