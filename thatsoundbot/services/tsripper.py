@@ -6,9 +6,8 @@ from uuid import UUID
 from aiogram.types import FSInputFile
 from loguru import logger
 
-from thatsoundbot.core.bot import create_bot
 from thatsoundbot.services.telegram import backup_track
-from thatsoundbot.settings import get_tsapi_settings, get_tsripper_settings, TSAPISettings, get_settings
+from thatsoundbot.settings import get_tsapi_settings, get_tsripper_settings, TSAPISettings
 from thatsoundbot.utils.http_client import HttpClient
 
 
@@ -103,8 +102,16 @@ def create_temp_files(file_in_bytes: bytes, thumbnail_in_bytes: bytes) -> tuple[
 
 async def process_backup_track(hgramid: str, scrobble_id: UUID, track_id_with_provider: str) -> str:
     tsapi_settings = get_tsapi_settings()
-    file_in_bytes, filename = await fetch_file_id_periodically(hgramid=hgramid, scrobble_id=scrobble_id)
-    thumbnail_in_bytes, _ = await get_track_thumbnail(hgramid=hgramid, scrobble_id=scrobble_id)
+
+    file_result = await fetch_file_id_periodically(hgramid=hgramid, scrobble_id=scrobble_id)
+    if not file_result:
+        raise RuntimeError(f"Failed to fetch audio file for scrobble_id={scrobble_id}")
+    file_in_bytes, filename = file_result
+
+    thumbnail_result = await get_track_thumbnail(hgramid=hgramid, scrobble_id=scrobble_id)
+    if not isinstance(thumbnail_result, tuple):
+        raise RuntimeError(f"Failed to fetch thumbnail for scrobble_id={scrobble_id}")
+    thumbnail_in_bytes, _ = thumbnail_result
 
     track_id, caption = create_caption(track_id_with_provider=track_id_with_provider)
     audio_temp_file, thumbnail_temp_file = create_temp_files(
@@ -137,6 +144,3 @@ async def process_backup_track(hgramid: str, scrobble_id: UUID, track_id_with_pr
 
     logger.info("[{hgramid}] [scrobble] [caching] success", hgramid=hgramid[:8])
     return new_file_id
-
-    
-

@@ -2,8 +2,7 @@ from aiogram.types import FSInputFile, InputMediaAudio
 from loguru import logger
 
 from thatsoundbot.core import  create_bot
-from thatsoundbot.settings import get_settings, get_tsapi_settings
-from thatsoundbot.utils.http_client import HttpClient
+from thatsoundbot.settings import get_settings
 
 
 async def attach_audio_in_message(hgramid: str, inline_message_id: str, file_id: str):
@@ -27,4 +26,6 @@ async def backup_track(audio: FSInputFile, thumbnail: FSInputFile, caption: str)
     )
     await bot.session.close()
 
+    if not sent_message.audio:
+        raise RuntimeError("Audio message was not sent")
     return sent_message.audio.file_id

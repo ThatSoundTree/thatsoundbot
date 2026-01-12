@@ -8,8 +8,8 @@ from thatsoundbot.core.keyboards.inline_menu import empty_inline_result, create_
 from thatsoundbot.core.models.pipelines_view import PipelineView
 from thatsoundbot.services.recent import get_recent_tracks
 from thatsoundbot.services.telegram import attach_audio_in_message
-from thatsoundbot.services.tsripper import scrobble_track, fetch_file_id_periodically, process_backup_track
-from thatsoundbot.settings import get_settings, get_tsripper_settings, TSAPISettings
+from thatsoundbot.services.tsripper import scrobble_track, process_backup_track
+from thatsoundbot.settings import get_tsripper_settings, TSAPISettings
 
 router = Router(name="inline")
 
