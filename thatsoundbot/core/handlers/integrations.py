@@ -1,3 +1,5 @@
+import asyncio
+
 from aiogram.enums import ParseMode
 
 from aiogram import Router, F
@@ -6,8 +8,7 @@ from aiogram.types import Message, CallbackQuery
 
 from thatsoundbot.core.keyboards.integrations import prepare_integrate_keyboard
 from thatsoundbot.core.models.pipelines_view import PipelineView
-from thatsoundbot.services.integrations import get_user_integrations
-
+from thatsoundbot.services.integrations import get_user_integrations, create_remote_user
 
 router = Router(name="integrations")
 
@@ -15,7 +16,11 @@ router = Router(name="integrations")
 @router.message(Command("start"))
 async def start_handler(message: Message, hgramid: str, pipeline: PipelineView) -> None:
     """Handles the start menu."""
-    integrations = await get_user_integrations(hgramid=hgramid)
+
+    integrations, _ = await asyncio.gather(
+        get_user_integrations(hgramid=hgramid),
+        create_remote_user(hgramid=hgramid)
+    )
     old_keyboard = message.reply_to_message.reply_markup if message.reply_to_message else None
     keyboard = prepare_integrate_keyboard(hgramid=hgramid, integrations=integrations, pipeline=pipeline)
 
