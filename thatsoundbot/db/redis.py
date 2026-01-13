@@ -146,21 +146,28 @@ class RedisClient:
         await client.delete(key)
 
     async def save_result_query(self, result_id: str, track: TrackView, ttl: int) -> None:
-        """Save track query result (instance method)."""
         client = self._ensure_instance_connected()
-        key = f"result:{result_id}"
+        hash_key = "results"
         track_dict = track.model_dump(mode='json')
         track_dict['provider'] = track.provider
         track_json = json.dumps(track_dict)
-        await client.setex(key, ttl, track_json)
+
+        result = client.hset(hash_key, result_id, track_json)
+        if isinstance(result, Awaitable):
+            await result
+
+        expire_result = client.expire(hash_key, ttl)
+        if isinstance(expire_result, Awaitable):
+            await expire_result
 
     async def get_result_query(self, result_id: str) -> TrackView | None:
         """Get track query result (instance method)."""
         client = self._ensure_instance_connected()
-        key = f"result:{result_id}"
-        result = await client.get(key)
-        if result is not None:
-            track_dict = json.loads(result)
+        hash_key = "results"
+        result = client.hget(hash_key, result_id)
+        result_value: str | None = await result if isinstance(result, Awaitable) else result
+        if result_value is not None:
+            track_dict = json.loads(result_value)
             return TrackView.model_validate(track_dict)
         return None
 

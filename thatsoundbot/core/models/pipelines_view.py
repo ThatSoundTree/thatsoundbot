@@ -27,6 +27,7 @@ class PipelinesView(BaseModel):
     """Pydantic model that implements different languages in pipeline.json"""
 
     RU: PipelineView
+    EN: PipelineView
 
     def __getitem__(self, language: str) -> PipelineView:
         pipelines_dict = self.model_dump()

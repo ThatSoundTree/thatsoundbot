@@ -5,7 +5,7 @@ from thatsoundbot.core.models.pipelines_view import TracksPipelineView
 from thatsoundbot.core.models.tsapi import TrackView
 from thatsoundbot.db import RedisClient
 from thatsoundbot.services.telegram import unique_result_id
-from thatsoundbot.settings import get_settings, get_tsripper_settings
+from thatsoundbot.settings import get_settings
 from aiogram.types import (
     InlineQueryResultArticle,
     InputTextMessageContent,

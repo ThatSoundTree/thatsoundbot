@@ -37,8 +37,8 @@ class Settings(BaseSettings):
     REDIS_PASSWORD: SecretStr | None = None
     REDIS_RESULT_TTL: int = Field(default=300)
 
-    FETCH_FILE_ATTEMPTS: int = Field(default=5)
-    FETCH_FILE_SLEEP_TIME: int = Field(default=10)
+    FETCH_FILE_ATTEMPTS: int = Field(default=10)
+    FETCH_FILE_SLEEP_TIME: int = Field(default=5)
 
 
     @computed_field  # type: ignore[prop-decorator]

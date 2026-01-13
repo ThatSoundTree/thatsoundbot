@@ -13,5 +13,20 @@
             "channel_ad_text": "Может что-то случилось? Стоит заглянуть в логи...",
             "loading_text": "Трек загружается"
         }
+    },
+    "EN": {
+        "welcome_message":  "**Hello**, @thatsoundbot allows you to share music you're listening to **right now** via inline-mode. Currently available integrations:",
+        "integrations": {
+             "connected": "connected",
+            "disconnected": "not connected",
+            "refresh_button_text": "Refresh",
+            "already_connected": "Already connected!"
+        },
+        "tracks": {
+            "empty_title": "Tracks not found. I think you haven't authorized",
+            "empty_inline_text": "Your ad could be here.\n@thatsoundbot",
+            "channel_ad_text": "Maybe something happened? Worth checking the logs...",
+            "loading_text": "Track is loading"
+        }
     }
 }

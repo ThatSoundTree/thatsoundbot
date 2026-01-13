@@ -138,6 +138,7 @@ jobs:
               --network thatsound-network \
               --restart unless-stopped \
               --env-file .env \
+              -v /tmp:/tmp \
               thatsoundbot-dev:latest
 
             docker image prune -f

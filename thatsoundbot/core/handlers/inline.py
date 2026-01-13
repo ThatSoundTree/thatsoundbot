@@ -1,4 +1,3 @@
-import asyncio
 from uuid import UUID
 
 from aiogram import F, Router
@@ -11,7 +10,7 @@ from thatsoundbot.db import RedisClient
 from thatsoundbot.services.recent import get_recent_tracks
 from thatsoundbot.services.telegram import attach_audio_in_message
 from thatsoundbot.services.tsripper import scrobble_track, process_backup_track
-from thatsoundbot.settings import get_tsripper_settings, TSAPISettings
+from thatsoundbot.settings import get_tsripper_settings
 
 router = Router(name="inline")
 
@@ -61,10 +60,19 @@ async def chosen_inline_result_handler(chosen_result: ChosenInlineResult, hgrami
                 hgramid=hgramid[:8],
                 result_id=chosen_result.result_id
             )
+            return
 
         await bot.edit_message_text(
             inline_message_id=chosen_result.inline_message_id,
             text=selected_track.url,
+        )
+        return
+
+    if not selected_track:
+        logger.error(
+            "[{hgramid}] [scrobble] redis cleared result=[{result_id}] earlier",
+            hgramid=hgramid[:8],
+            result_id=chosen_result.result_id
         )
         return
 
