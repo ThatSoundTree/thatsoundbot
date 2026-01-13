@@ -67,6 +67,7 @@ class TSRipperSettings(BaseSettings):
     BASE_URL: str
     IN_USE: bool = Field(default=False)
     SCROBBLE_SLEEP_TIME: int = Field(default=3)
+    ATTEMPTS: int = Field(default=5)
 
     model_config = SettingsConfigDict(
         env_file=".env", case_sensitive=False, extra="ignore", env_prefix="TSRIPPER_"
