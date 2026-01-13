@@ -16,8 +16,12 @@ router = Router(name="integrations")
 async def start_handler(message: Message, hgramid: str, pipeline: PipelineView) -> None:
     """Handles the start menu."""
     integrations = await get_user_integrations(hgramid=hgramid)
-
+    old_keyboard = message.reply_to_message.reply_markup if message.reply_to_message else None
     keyboard = prepare_integrate_keyboard(hgramid=hgramid, integrations=integrations, pipeline=pipeline)
+
+    if old_keyboard and old_keyboard.model_dump_json() == keyboard.model_dump_json():
+        return
+
     await message.answer(pipeline.welcome_message, parse_mode=ParseMode.MARKDOWN, reply_markup=keyboard)
 
 
