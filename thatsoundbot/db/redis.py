@@ -1,6 +1,8 @@
 from contextvars import Token
 from typing import Any, Awaitable
 import json
+from uuid import UUID
+
 import redis.asyncio as redis
 from loguru import logger
 
@@ -161,3 +163,15 @@ class RedisClient:
             track_dict = json.loads(result)
             return TrackView.model_validate(track_dict)
         return None
+
+    async def get_track_path(self, scrobble_id: UUID) -> str | None:
+        client = self._ensure_instance_connected()
+        key = f"cache:scrobble:{scrobble_id.hex}"
+        result = await client.get(name=key)
+        return result if result is not None else None
+
+    async def get_track_thumbnail_path(self, scrobble_id: UUID) -> str | None:
+        client = self._ensure_instance_connected()
+        key = f"cache:scrobble:{scrobble_id.hex}:thumbnail"
+        result = await client.get(name=key)
+        return result if result is not None else None

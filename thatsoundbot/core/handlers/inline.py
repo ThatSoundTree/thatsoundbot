@@ -75,37 +75,11 @@ async def chosen_inline_result_handler(chosen_result: ChosenInlineResult, hgrami
         file_id = scrobble_response
     elif isinstance(scrobble_response, UUID):
         logger.info("[{hgramid}] [scrobble] caching new track", hgramid=hgramid[:8])
-
-        # Retry logic for ripper service
-        attempts = tsripper_settings.ATTEMPTS
-        last_error = None
-        for attempt in range(1, attempts + 1):
-            try:
-                file_id = await process_backup_track(
-                    hgramid=hgramid,
-                    scrobble_id=scrobble_response,
-                    track_id_with_provider=f"{track_id}!@#{track_provider}"
-                )
-                break
-            except Exception as e:
-                last_error = e
-                if attempt < attempts:
-                    wait_time = attempt * tsripper_settings.SCROBBLE_SLEEP_TIME
-                    logger.warning(
-                        "[{hgramid}] [scrobble] attempt {attempt}/{attempts} failed: {error}, retrying in {wait_time}s",
-                        hgramid=hgramid[:8], attempt=attempt, attempts=attempts,
-                        error=str(e)[:100], wait_time=wait_time
-                    )
-                    await asyncio.sleep(wait_time)
-                else:
-                    logger.error(
-                        "[{hgramid}] [scrobble] all {attempts} attempts failed: {error}",
-                        hgramid=hgramid[:8], attempts=attempts, error=str(e)[:200]
-                    )
-                    raise
-        else:
-            if last_error:
-                raise last_error
+        file_id = await process_backup_track(
+            hgramid=hgramid,
+            scrobble_id=scrobble_response,
+            track=selected_track,
+        )
     else:
         return
 

@@ -5,7 +5,7 @@ from loguru import logger
 
 from thatsoundbot.core import  create_bot
 from thatsoundbot.core.models.tsapi import TrackView
-from thatsoundbot.settings import get_settings
+from thatsoundbot.settings import get_settings, TSAPISettings
 
 
 async def attach_audio_in_message(hgramid: str, inline_message_id: str, file_id: str):
@@ -37,3 +37,14 @@ async def backup_track(audio: FSInputFile, thumbnail: FSInputFile, caption: str)
 def unique_result_id(track: TrackView) -> str:
     raw = f"track:{track.provider}:{track.id}"
     return hashlib.sha1(raw.encode()).hexdigest()[:32]
+
+
+def create_caption(track: TrackView) -> str:
+    provider_enum = TSAPISettings.Providers(track.provider)
+    caption = f"{provider_enum.name}:{track.id}"
+    return caption
+
+
+def create_telegram_filename(track: TrackView) -> str:
+    artists = ", ".join(track.artists)
+    return f"{artists} - {track.name}"
