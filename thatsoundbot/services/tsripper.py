@@ -21,7 +21,8 @@ async def scrobble_track(hgramid: str, selected_track: TrackView) -> None | str 
 
     if response.status_code == 200:
         resp = response.json()
-        return resp["tfile_url"]
+        tfile_url: str = resp["tfile_url"]
+        return tfile_url
     elif response.status_code != 503:
         logger.error(
             "[{hgramid}] [scrobble] [{track_id}] unexpected api error: {error_text}",
