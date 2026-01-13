@@ -1,4 +1,4 @@
-import hashlib
+from uuid import uuid4
 
 from aiogram.types import FSInputFile, InputMediaAudio
 from loguru import logger
@@ -34,9 +34,8 @@ async def backup_track(audio: FSInputFile, thumbnail: FSInputFile, caption: str)
     return sent_message.audio.file_id
 
 
-def unique_result_id(track: TrackView) -> str:
-    raw = f"track:{track.provider}:{track.id}"
-    return hashlib.sha1(raw.encode()).hexdigest()[:32]
+def unique_result_id() -> str:
+    return uuid4().hex
 
 
 def create_caption(track: TrackView) -> str:
