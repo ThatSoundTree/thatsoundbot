@@ -3,6 +3,7 @@ from aiogram.client.default import DefaultBotProperties
 
 from thatsoundbot.settings import Settings
 from thatsoundbot.core.langs.middleware import PipelineMiddleware
+from thatsoundbot.core.langs.redis_middleware import RedisMiddleware
 
 
 def create_bot(settings: Settings) -> Bot:
@@ -14,9 +15,16 @@ def create_bot(settings: Settings) -> Bot:
 
 
 def create_dispatcher() -> Dispatcher:
-    """Creates dispatcher instance with pipeline middleware."""
+    """Creates dispatcher instance with pipeline and redis middleware."""
     dp = Dispatcher()
 
+    # Register Redis middleware first (it will be called before PipelineMiddleware)
+    dp.message.middleware(RedisMiddleware())
+    dp.callback_query.middleware(RedisMiddleware())
+    dp.inline_query.middleware(RedisMiddleware())
+    dp.chosen_inline_result.middleware(RedisMiddleware())
+
+    # Register Pipeline middleware
     dp.message.middleware(PipelineMiddleware())
     dp.callback_query.middleware(PipelineMiddleware())
     dp.inline_query.middleware(PipelineMiddleware())

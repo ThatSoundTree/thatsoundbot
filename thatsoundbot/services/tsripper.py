@@ -1,21 +1,21 @@
 import asyncio
-import tempfile
-from pathlib import Path
 from uuid import UUID
 
 from aiogram.types import FSInputFile
 from loguru import logger
 
-from thatsoundbot.services.telegram import backup_track
-from thatsoundbot.settings import get_tsapi_settings, get_tsripper_settings, TSAPISettings
+from thatsoundbot.core.models.tsapi import TrackView
+from thatsoundbot.db import RedisClient
+from thatsoundbot.services.telegram import backup_track, create_telegram_filename, create_caption
+from thatsoundbot.settings import get_tsapi_settings,  get_settings
 from thatsoundbot.utils.http_client import HttpClient
 
 
-async def scrobble_track(hgramid: str, track_id: str, track_provider: str) -> None | str | UUID:
+async def scrobble_track(hgramid: str, selected_track: TrackView) -> None | str | UUID:
     tsapi_settings = get_tsapi_settings()
     response = await HttpClient.get(
         url=tsapi_settings.BASE_URL + f"/{hgramid}/scrobble",
-        params={"track_id": track_id, "track_provider": track_provider},
+        params={"track_id": selected_track.id, "track_provider": selected_track.provider},
         headers=tsapi_settings.get_header()
     )
 
@@ -26,7 +26,7 @@ async def scrobble_track(hgramid: str, track_id: str, track_provider: str) -> No
         logger.error(
             "[{hgramid}] [scrobble] [{track_id}] unexpected api error: {error_text}",
             hgramid=hgramid,
-            track_id=track_id,
+            track_id=selected_track.id,
             error_text=response.text[:200],
         )
         return None
@@ -35,102 +35,49 @@ async def scrobble_track(hgramid: str, track_id: str, track_provider: str) -> No
     return UUID(resp["id"])
 
 
-async def get_track_template(hgramid: str, scrobble_id: UUID, is_thumbnail_request: bool = False) -> tuple[bytes, str] | bool | None :
-    tsripper = get_tsripper_settings()
-    if is_thumbnail_request:
-        url = tsripper.BASE_URL + f"/cache/{scrobble_id.hex}/thumbnail"
-    else:
-        url = tsripper.BASE_URL + f"/cache/{scrobble_id.hex}"
+async def fetch_file_path_periodically(scrobble_id: UUID) -> str | None:
+    settings = get_settings()
+    redis = RedisClient.current()
+    attempt = 0
+    track_path = None
+    while attempt < settings.FETCH_FILE_ATTEMPTS:
+        await asyncio.sleep(settings.FETCH_FILE_SLEEP_TIME)
+        track_path = await redis.get_track_path(scrobble_id=scrobble_id)
+        if not track_path:
+            attempt += 1
+            continue
+        break
 
-    response = await HttpClient.get(
-        url=url,
-    )
-
-    if response.status_code == 204:
+    if not track_path:
+        logger.error("[scrobble] [{scrobble_id}] failed to fetch after attempts", scrobble_id=scrobble_id)
         return None
-    elif response.status_code != 200:
-        logger.error(
-            "[{hgramid}] [ripper] [{scrobble_id}] unexpected api error: {error_text}",
-            hgramid=hgramid,
-            scrobble_id=scrobble_id.hex[:8],
-            error_text=response.text[:200],
-        )
-        return False
 
-    filename = response.headers["Content-Disposition"].split("filename=")[1]
-    return response.content, filename
+    return track_path
 
 
-async def get_track_file(hgramid: str, scrobble_id: UUID) -> tuple[bytes, str] | bool | None :
-    return await get_track_template(hgramid=hgramid, scrobble_id=scrobble_id)
-
-
-async def get_track_thumbnail(hgramid: str, scrobble_id: UUID) -> tuple[bytes, str] | bool | None :
-    return await get_track_template(hgramid=hgramid, scrobble_id=scrobble_id, is_thumbnail_request=True)
-
-
-async def fetch_file_id_periodically(hgramid:str, scrobble_id: UUID) -> tuple[bytes, str] | None:
-    tsripper_settings = get_tsripper_settings()
-    while True:
-        await asyncio.sleep(tsripper_settings.SCROBBLE_SLEEP_TIME)
-        result = await get_track_file(hgramid=hgramid, scrobble_id=scrobble_id)
-        if result is False:
-            return None
-        if isinstance(result, tuple):
-            return result
-        # result is None, continue waiting
-
-
-def create_caption(track_id_with_provider: str) -> tuple[str, str]:
-    track_id, provider_id_str = track_id_with_provider.split("!@#")
-    provider_enum = TSAPISettings.Providers(int(provider_id_str))
-    caption = f"{provider_enum.name}:{track_id}"
-    return track_id, caption
-
-
-def create_temp_files(file_in_bytes: bytes, thumbnail_in_bytes: bytes) -> tuple[Path, Path]:
-    # Create temporary files
-    _, audio_temp_path = tempfile.mkstemp(suffix='.mp3')
-    audio_temp_file = Path(audio_temp_path)
-    audio_temp_file.write_bytes(file_in_bytes)
-
-    _, thumbnail_temp_path = tempfile.mkstemp(suffix='.jpg')
-    thumbnail_temp_file = Path(thumbnail_temp_path)
-    thumbnail_temp_file.write_bytes(thumbnail_in_bytes)
-    return audio_temp_file, thumbnail_temp_file
-
-
-async def process_backup_track(hgramid: str, scrobble_id: UUID, track_id_with_provider: str) -> str:
+async def process_backup_track(hgramid: str, scrobble_id: UUID, track: TrackView) -> str:
     tsapi_settings = get_tsapi_settings()
+    redis = RedisClient.current()
 
-    file_result = await fetch_file_id_periodically(hgramid=hgramid, scrobble_id=scrobble_id)
-    if not file_result:
-        raise RuntimeError(f"Failed to fetch audio file for scrobble_id={scrobble_id}")
-    file_in_bytes, filename = file_result
+    file_path = await fetch_file_path_periodically(scrobble_id=scrobble_id)
+    if not file_path:
+        raise RuntimeError
 
-    thumbnail_result = await get_track_thumbnail(hgramid=hgramid, scrobble_id=scrobble_id)
-    if not isinstance(thumbnail_result, tuple):
-        raise RuntimeError(f"Failed to fetch thumbnail for scrobble_id={scrobble_id}")
-    thumbnail_in_bytes, _ = thumbnail_result
+    thumbnail_path = await redis.get_track_thumbnail_path(scrobble_id=scrobble_id)
 
-    track_id, caption = create_caption(track_id_with_provider=track_id_with_provider)
-    audio_temp_file, thumbnail_temp_file = create_temp_files(
-        file_in_bytes=file_in_bytes, thumbnail_in_bytes=thumbnail_in_bytes
-    )
-
+    if not thumbnail_path:
+        raise RuntimeError
 
     new_file_id = await backup_track(
-        audio=FSInputFile(path=audio_temp_file, filename=filename),
-        thumbnail=FSInputFile(path=thumbnail_temp_file, filename="thumbnail.jpg"),
-        caption=caption
+        audio=FSInputFile(path=file_path, filename=create_telegram_filename(track=track)),
+        thumbnail=FSInputFile(path=thumbnail_path, filename="thumbnail.jpg"),
+        caption=create_caption(track=track)
     )
 
-    audio_temp_file.unlink(missing_ok=True)
-    thumbnail_temp_file.unlink(missing_ok=True)
 
     response = await HttpClient.patch(
         url=tsapi_settings.BASE_URL + f"/{hgramid}/scrobble/",
-        params={"external_track_id": track_id, "tfile_url": new_file_id},
+        params={"external_track_id": track.id, "tfile_url": new_file_id},
         headers=tsapi_settings.get_header()
     )
 
@@ -142,5 +89,5 @@ async def process_backup_track(hgramid: str, scrobble_id: UUID, track_id_with_pr
         )
         return new_file_id
 
-    logger.info("[{hgramid}] [scrobble] [caching] success", hgramid=hgramid[:8])
+    logger.success("[{hgramid}] [scrobble] [caching] success", hgramid=hgramid[:8])
     return new_file_id
