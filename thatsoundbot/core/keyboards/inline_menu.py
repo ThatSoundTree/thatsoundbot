@@ -3,7 +3,8 @@ import string
 
 from thatsoundbot.core.models.pipelines_view import TracksPipelineView
 from thatsoundbot.core.models.tsapi import TrackView
-from thatsoundbot.services.telegram import make_track_id
+from thatsoundbot.db import RedisClient
+from thatsoundbot.services.telegram import unique_result_id
 from thatsoundbot.settings import get_settings, get_tsripper_settings
 from aiogram.types import (
     InlineQueryResultArticle,
@@ -54,11 +55,13 @@ def create_loading_markup() -> InlineKeyboardMarkup:
     )
 
 
-def create_track_item(track: TrackView, tracks_pipeline: TracksPipelineView, inline_query_id: str, provider: int) -> InlineQueryResultArticle:
-    tsripper_settings = get_tsripper_settings()
+async def create_track_item(track: TrackView, tracks_pipeline: TracksPipelineView) -> InlineQueryResultArticle:
+    redis = RedisClient.current()
+    result_id = unique_result_id(track=track)
+    await redis.save_result_query(result_id=result_id, track=track)
 
     result = InlineQueryResultArticle(
-        id=make_track_id(provider=provider, track=track),
+        id=result_id,
         title=track.name,
         description=", ".join(track.artists) if track.artists else "Unknown Artist",
         input_message_content=InputTextMessageContent(

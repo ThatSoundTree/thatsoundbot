@@ -5,6 +5,7 @@ import redis.asyncio as redis
 from loguru import logger
 
 from thatsoundbot.core.models.tokens import SpotifyTokens, YandexToken
+from thatsoundbot.core.models.tsapi import TrackView
 from thatsoundbot.db.connection import redis_client as redis_client_var
 from thatsoundbot.settings import get_settings
 
@@ -141,3 +142,25 @@ class RedisClient:
         client = self._ensure_instance_connected()
         key = f"yandex:token:{hgramid}"
         await client.delete(key)
+
+    async def save_result_query(self, result_id: str, track: TrackView) -> None:
+        """Save track query result (instance method)."""
+        client = self._ensure_instance_connected()
+        key = f"result:{result_id}"
+        track_dict = track.model_dump(mode='json')
+        track_dict['provider'] = track.provider
+        import json
+        track_json = json.dumps(track_dict)
+        await client.setex(key, 3600, track_json)  # TTL 1 hour
+
+    async def get_result_query(self, result_id: str) -> TrackView | None:
+        """Get track query result (instance method)."""
+        client = self._ensure_instance_connected()
+        key = f"result:{result_id}"
+        result = await client.get(key)
+        if result is not None:
+            # Parse JSON - provider should be integer, Pydantic will convert it to enum
+            import json
+            track_dict = json.loads(result)
+            return TrackView.model_validate(track_dict)
+        return None

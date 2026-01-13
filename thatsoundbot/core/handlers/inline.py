@@ -7,6 +7,7 @@ from loguru import logger
 
 from thatsoundbot.core.keyboards.inline_menu import empty_inline_result, create_track_item
 from thatsoundbot.core.models.pipelines_view import PipelineView
+from thatsoundbot.db import RedisClient
 from thatsoundbot.services.recent import get_recent_tracks
 from thatsoundbot.services.telegram import attach_audio_in_message
 from thatsoundbot.services.tsripper import scrobble_track, process_backup_track
@@ -28,9 +29,8 @@ async def inline_query_handler(inline_query: InlineQuery, hgramid: str, pipeline
         return
 
     results = []
-    spotify_items = [create_track_item(track=track, tracks_pipeline=pipeline.tracks, inline_query_id=inline_query.id, provider=TSAPISettings.Providers.Spotify.value) for track in tracks.spotify]
-    yandex_music_items = [create_track_item(track=track, tracks_pipeline=pipeline.tracks, inline_query_id=inline_query.id, provider=TSAPISettings.Providers.YandexMusic.value) for track in tracks.yandex_music]
-
+    spotify_items = [await create_track_item(track=track, tracks_pipeline=pipeline.tracks) for track in tracks.spotify]
+    yandex_music_items = [await create_track_item(track=track, tracks_pipeline=pipeline.tracks) for track in tracks.yandex_music]
 
     logger.info(
         "[{hgramid}] [inline] prepared yandex_music={len_yandex} and spotify={len_spotify}",
@@ -46,27 +46,29 @@ async def inline_query_handler(inline_query: InlineQuery, hgramid: str, pipeline
 async def chosen_inline_result_handler(chosen_result: ChosenInlineResult, hgramid: str) -> None:
     """Handle chosen inline result and send track text."""
     tsripper_settings = get_tsripper_settings()
+    redis = RedisClient.current()
 
     bot = chosen_result.bot
     if not (bot and chosen_result.inline_message_id):
         raise RuntimeError
 
+    selected_track = await redis.get_result_query(result_id=chosen_result.result_id)
+
     if not tsripper_settings.IN_USE:
-        track_url = chosen_result.result_id
-        if "_" in track_url:
-            track_url = track_url.split("_", 1)[1]
+        if not selected_track:
+            logger.error(
+                "[{hgramid}] [scrobble] redis cleared result=[{result_id}] earlier",
+                hgramid=hgramid[:8],
+                result_id=chosen_result.result_id
+            )
 
         await bot.edit_message_text(
             inline_message_id=chosen_result.inline_message_id,
-            text=track_url,
+            text=selected_track.url,
         )
         return
 
-    raw_scrobble_info = chosen_result.result_id.split("_")
-    track_id = raw_scrobble_info[-2]
-    track_provider = raw_scrobble_info[-1]
-
-    scrobble_response = await scrobble_track(hgramid=hgramid, track_id=track_id, track_provider=track_provider)
+    scrobble_response = await scrobble_track(hgramid=hgramid, selected_track=selected_track)
 
     if isinstance(scrobble_response, str):
         logger.info("[{hgramid}] [scrobble] using cached track", hgramid=hgramid[:8])

@@ -34,6 +34,6 @@ async def backup_track(audio: FSInputFile, thumbnail: FSInputFile, caption: str)
     return sent_message.audio.file_id
 
 
-def make_track_id(provider: int, track: TrackView) -> str:
-    raw = f"track:{provider}:{track.id}"
+def unique_result_id(track: TrackView) -> str:
+    raw = f"track:{track.provider}:{track.id}"
     return hashlib.sha1(raw.encode()).hexdigest()[:32]

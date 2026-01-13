@@ -6,16 +6,17 @@ from uuid import UUID
 from aiogram.types import FSInputFile
 from loguru import logger
 
+from thatsoundbot.core.models.tsapi import TrackView
 from thatsoundbot.services.telegram import backup_track
 from thatsoundbot.settings import get_tsapi_settings, get_tsripper_settings, TSAPISettings
 from thatsoundbot.utils.http_client import HttpClient
 
 
-async def scrobble_track(hgramid: str, track_id: str, track_provider: str) -> None | str | UUID:
+async def scrobble_track(hgramid: str, selected_track: TrackView) -> None | str | UUID:
     tsapi_settings = get_tsapi_settings()
     response = await HttpClient.get(
         url=tsapi_settings.BASE_URL + f"/{hgramid}/scrobble",
-        params={"track_id": track_id, "track_provider": track_provider},
+        params={"track_id": selected_track.id, "track_provider": selected_track.provider},
         headers=tsapi_settings.get_header()
     )
 
@@ -26,7 +27,7 @@ async def scrobble_track(hgramid: str, track_id: str, track_provider: str) -> No
         logger.error(
             "[{hgramid}] [scrobble] [{track_id}] unexpected api error: {error_text}",
             hgramid=hgramid,
-            track_id=track_id,
+            track_id=selected_track.id,
             error_text=response.text[:200],
         )
         return None
