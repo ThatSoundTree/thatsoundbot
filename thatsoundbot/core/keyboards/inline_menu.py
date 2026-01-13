@@ -3,6 +3,7 @@ import string
 
 from thatsoundbot.core.models.pipelines_view import TracksPipelineView
 from thatsoundbot.core.models.tsapi import TrackView
+from thatsoundbot.services.telegram import make_track_id
 from thatsoundbot.settings import get_settings, get_tsripper_settings
 from aiogram.types import (
     InlineQueryResultArticle,
@@ -56,13 +57,8 @@ def create_loading_markup() -> InlineKeyboardMarkup:
 def create_track_item(track: TrackView, tracks_pipeline: TracksPipelineView, inline_query_id: str, provider: int) -> InlineQueryResultArticle:
     tsripper_settings = get_tsripper_settings()
 
-    if not tsripper_settings.IN_USE:
-        unique_id = f"{inline_query_id[:6]}_{track.url}"
-    else:
-        unique_id = f"{inline_query_id[:6]}_{track.id}_{provider}"
-
     result = InlineQueryResultArticle(
-        id=unique_id,
+        id=make_track_id(provider=provider, track=track),
         title=track.name,
         description=", ".join(track.artists) if track.artists else "Unknown Artist",
         input_message_content=InputTextMessageContent(

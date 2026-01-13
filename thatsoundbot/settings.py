@@ -2,8 +2,9 @@ import json
 from enum import Enum
 from functools import lru_cache
 from typing import TypedDict
+from urllib.parse import quote_plus
 
-from pydantic import Field, SecretStr
+from pydantic import Field, SecretStr, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from thatsoundbot.core.models.pipelines_view import PipelinesView
@@ -28,10 +29,37 @@ class Settings(BaseSettings):
     LOGS_CHANNEL_URL: str
     CACHE_CHANNEL: str
 
+    # Redis Configuration
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = Field(default=6379, ge=1, le=65535)
+    REDIS_DB: int = Field(default=0, ge=0)
+    REDIS_USERNAME: str | None = None
+    REDIS_PASSWORD: SecretStr | None = None
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def REDIS_URL(self) -> str:
+        """Auto assembling redis url with URL encoding"""
+        host = self.REDIS_HOST
+        port = self.REDIS_PORT
+        db = self.REDIS_DB
+
+        if self.REDIS_USERNAME and self.REDIS_PASSWORD:
+            username = quote_plus(self.REDIS_USERNAME)
+            password = quote_plus(self.REDIS_PASSWORD.get_secret_value())
+            return f"redis://{username}:{password}@{host}:{port}/{db}"
+        elif self.REDIS_USERNAME:
+            username = quote_plus(self.REDIS_USERNAME)
+            return f"redis://{username}@{host}:{port}/{db}"
+        elif self.REDIS_PASSWORD:
+            password = quote_plus(self.REDIS_PASSWORD.get_secret_value())
+            return f"redis://:{password}@{host}:{port}/{db}"
+        return f"redis://{host}:{port}/{db}"
 
     model_config = SettingsConfigDict(
         env_file=".env", case_sensitive=False, extra="ignore", env_prefix="TELEGRAM_BOT_"
     )
+
 
 
 class TSAPISettings(BaseSettings):

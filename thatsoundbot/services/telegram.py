@@ -1,7 +1,10 @@
+import hashlib
+
 from aiogram.types import FSInputFile, InputMediaAudio
 from loguru import logger
 
 from thatsoundbot.core import  create_bot
+from thatsoundbot.core.models.tsapi import TrackView
 from thatsoundbot.settings import get_settings
 
 
@@ -29,3 +32,8 @@ async def backup_track(audio: FSInputFile, thumbnail: FSInputFile, caption: str)
     if not sent_message.audio:
         raise RuntimeError("Audio message was not sent")
     return sent_message.audio.file_id
+
+
+def make_track_id(provider: int, track: TrackView) -> str:
+    raw = f"track:{provider}:{track.id}"
+    return hashlib.sha1(raw.encode()).hexdigest()[:32]
