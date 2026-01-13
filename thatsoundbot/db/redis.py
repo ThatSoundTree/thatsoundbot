@@ -1,6 +1,6 @@
 from contextvars import Token
 from typing import Any, Awaitable
-
+import json
 import redis.asyncio as redis
 from loguru import logger
 
@@ -143,15 +143,14 @@ class RedisClient:
         key = f"yandex:token:{hgramid}"
         await client.delete(key)
 
-    async def save_result_query(self, result_id: str, track: TrackView) -> None:
+    async def save_result_query(self, result_id: str, track: TrackView, ttl: int) -> None:
         """Save track query result (instance method)."""
         client = self._ensure_instance_connected()
         key = f"result:{result_id}"
         track_dict = track.model_dump(mode='json')
         track_dict['provider'] = track.provider
-        import json
         track_json = json.dumps(track_dict)
-        await client.setex(key, 3600, track_json)  # TTL 1 hour
+        await client.setex(key, ttl, track_json)
 
     async def get_result_query(self, result_id: str) -> TrackView | None:
         """Get track query result (instance method)."""
@@ -159,8 +158,6 @@ class RedisClient:
         key = f"result:{result_id}"
         result = await client.get(key)
         if result is not None:
-            # Parse JSON - provider should be integer, Pydantic will convert it to enum
-            import json
             track_dict = json.loads(result)
             return TrackView.model_validate(track_dict)
         return None

@@ -57,8 +57,9 @@ def create_loading_markup() -> InlineKeyboardMarkup:
 
 async def create_track_item(track: TrackView, tracks_pipeline: TracksPipelineView) -> InlineQueryResultArticle:
     redis = RedisClient.current()
+    settings = get_settings()
     result_id = unique_result_id(track=track)
-    await redis.save_result_query(result_id=result_id, track=track)
+    await redis.save_result_query(result_id=result_id, track=track, ttl=settings.REDIS_RESULT_TTL)
 
     result = InlineQueryResultArticle(
         id=result_id,

@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     REDIS_DB: int = Field(default=0, ge=0)
     REDIS_USERNAME: str | None = None
     REDIS_PASSWORD: SecretStr | None = None
+    REDIS_RESULT_TTL: int = Field(default=300)
 
     @computed_field  # type: ignore[prop-decorator]
     @property
