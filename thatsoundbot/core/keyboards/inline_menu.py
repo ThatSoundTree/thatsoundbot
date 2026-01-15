@@ -42,8 +42,7 @@ def create_channel_ad_query_result(tracks_pipeline) -> InlineQueryResultArticle:
 
 def empty_inline_result(tracks_pipeline) -> list[InlineQueryResultArticle]:
     return [
-        create_empty_tracks_article(tracks_pipeline),
-        create_channel_ad_query_result(tracks_pipeline),
+        create_empty_tracks_article(tracks_pipeline)
     ]
 
 
