@@ -3,7 +3,6 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 from dataclasses import dataclass
-from typing import Literal
 from thatsoundbot.settings import TSAPISettings
 
 

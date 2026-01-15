@@ -3,7 +3,7 @@ from aiogram.exceptions import TelegramBadRequest, TelegramNotFound, TelegramCon
 from aiogram.filters.exception import ExceptionTypeFilter
 from aiogram.types import ErrorEvent
 from loguru import logger
-from thatsoundbot.utils.hashing import hash_telegram_id
+from thatsoundbot.utils.hashing import to_hgramid
 
 
 IGNORABLE_ERRORS = {
@@ -28,13 +28,13 @@ IGNORABLE_ERRORS = {
 
 def _extract_hgramid_from_update(update) -> str:
     if update.callback_query and update.callback_query.from_user:
-        return hash_telegram_id(update.callback_query.from_user.id)
+        return to_hgramid(update.callback_query.from_user.id)
     elif update.message and update.message.from_user:
-        return hash_telegram_id(update.message.from_user.id)
+        return to_hgramid(update.message.from_user.id)
     elif update.inline_query and update.inline_query.from_user:
-        return hash_telegram_id(update.inline_query.from_user.id)
+        return to_hgramid(update.inline_query.from_user.id)
     elif update.chosen_inline_result and update.chosen_inline_result.from_user:
-        return hash_telegram_id(update.chosen_inline_result.from_user.id)
+        return to_hgramid(update.chosen_inline_result.from_user.id)
     return "unknown"
 
 
@@ -49,7 +49,7 @@ def create_error_router() -> Router:
         if any(ignorable in error_message for ignorable in IGNORABLE_ERRORS):
             hgramid = _extract_hgramid_from_update(event.update)
             hgramid_short = hgramid[:8] if isinstance(hgramid, str) else "unknown"
-            
+
             logger.warning(
                 "[{hgramid}] [tg_error] TelegramBadRequest: {error_msg}",
                 hgramid=hgramid_short,
@@ -62,15 +62,15 @@ def create_error_router() -> Router:
             error_msg=exception.message if hasattr(exception, "message") else str(exception)
         )
 
-    @router.error(ExceptionTypeFilter((TelegramNotFound, TelegramConflictError)))
+    @router.error(ExceptionTypeFilter(TelegramNotFound, TelegramConflictError))
     async def telegram_not_found_handler(event: ErrorEvent) -> None:
         exception = event.exception
         error_message = str(exception).lower()
-        
+
         if any(ignorable in error_message for ignorable in IGNORABLE_ERRORS):
             hgramid = _extract_hgramid_from_update(event.update)
             hgramid_short = hgramid[:8] if isinstance(hgramid, str) else "unknown"
-            
+
             logger.warning(
                 "[{hgramid}] [tg_error] {error_type}: {error_msg}",
                 hgramid=hgramid_short,
@@ -78,11 +78,11 @@ def create_error_router() -> Router:
                 error_msg=exception.message if hasattr(exception, "message") else str(exception)
             )
             return
-        
+
         logger.warning(
             "[tg_error] Unhandled {error_type}: {error_msg}",
             error_type=type(exception).__name__,
             error_msg=exception.message if hasattr(exception, "message") else str(exception)
         )
-    
+
     return router

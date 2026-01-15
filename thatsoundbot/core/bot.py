@@ -1,9 +1,9 @@
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 
+from thatsoundbot.core.middlewares.pipelines_middleware import PipelineMiddleware
 from thatsoundbot.settings import Settings
-from thatsoundbot.core.langs.middleware import PipelineMiddleware
-from thatsoundbot.core.langs.redis_middleware import RedisMiddleware
+from thatsoundbot.core.middlewares.redis_middleware import RedisMiddleware
 from thatsoundbot.core.middlewares import create_error_router
 
 
@@ -19,7 +19,7 @@ def create_dispatcher() -> Dispatcher:
     """Creates dispatcher instance with pipeline and redis middleware."""
     dp = Dispatcher()
 
-    # Register error handlers router first (to catch all errors)
+    # Register error handlers
     error_router = create_error_router()
     dp.include_router(error_router)
 

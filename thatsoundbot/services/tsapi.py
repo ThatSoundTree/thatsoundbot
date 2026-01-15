@@ -59,4 +59,4 @@ async def patch_file_id(hgramid: str, track_id: str, new_file_id: str):
             error_text=response.text[:200]
         )
 
-    logger.success("[{hgramid}] [{track_id}] success patched filed_id")
+    logger.success("[{hgramid}] [{track_id}] success patched filed_id", hgramid=hgramid[:8], track_id=track_id[:8])

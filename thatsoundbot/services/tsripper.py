@@ -91,6 +91,9 @@ async def process_chosen_result(redis: RedisService, bot: Bot, chosen_result: Ch
             file_id = scrobble_result.file_id
         case ScrobbleStatus.CREATED:
             logger.info("[{hgramid}] [scrobble] caching new track", hgramid=hgramid[:8])
+            if scrobble_result.scrobble_id is None:
+                logger.error("[{hgramid}] [scrobble] scrobble_id is None for CREATED status", hgramid=hgramid[:8])
+                return
             file_id = await process_backup_track(
                 redis=redis,
                 bot=bot,
@@ -101,7 +104,7 @@ async def process_chosen_result(redis: RedisService, bot: Bot, chosen_result: Ch
         case _:
             logger.warning("[{hgramid}] [scrobble] invalid scrobble status: {scrobble_status}", hgramid=hgramid[:8], scrobble_status=scrobble_result.status)
 
-    if file_id:
+    if file_id and chosen_result.inline_message_id:
         await attach_audio_in_message(
             bot=bot,
             hgramid=hgramid,
