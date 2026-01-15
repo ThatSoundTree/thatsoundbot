@@ -1,3 +1,4 @@
+import asyncio
 
 from loguru import logger
 
@@ -20,6 +21,8 @@ async def create_remote_user(hgramid: str) -> None:
 
 
 async def get_user_integrations(redis: RedisService, hgramid: str) -> dict:
-    has_spotify = await redis.has_spotify_integration(hgramid=hgramid)
-    has_yandex_music = await redis.has_yandex_music_integration(hgramid=hgramid)
+    has_spotify, has_yandex_music = await asyncio.gather(
+        redis.has_spotify_integration(hgramid=hgramid),
+        redis.has_yandex_music_integration(hgramid=hgramid)
+    )
     return {"spotify": has_spotify, "YandexMusic": has_yandex_music}
