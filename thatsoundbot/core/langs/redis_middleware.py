@@ -3,7 +3,7 @@ from typing import Any, Awaitable, Callable
 from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject
 
-from thatsoundbot.db.redis import RedisClient
+from thatsoundbot.db import get_redis
 
 
 class RedisMiddleware(BaseMiddleware):
@@ -26,7 +26,6 @@ class RedisMiddleware(BaseMiddleware):
         The connection is automatically closed when the handler finishes,
         thanks to the async context manager protocol.
         """
-        redis_client = RedisClient()
-        async with redis_client:
-            data["redis"] = redis_client
-            return await handler(event, data)
+        redis_service = await get_redis()
+        data["redis"] = redis_service
+        return await handler(event, data)

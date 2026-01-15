@@ -3,7 +3,7 @@ import string
 
 from thatsoundbot.core.models.pipelines_view import TracksPipelineView
 from thatsoundbot.core.models.tsapi import TrackView
-from thatsoundbot.db import RedisClient
+from thatsoundbot.db.redis import RedisService
 from thatsoundbot.services.telegram import unique_result_id
 from thatsoundbot.settings import get_settings
 from aiogram.types import (
@@ -55,9 +55,9 @@ def create_loading_markup() -> InlineKeyboardMarkup:
     )
 
 
-async def create_track_item(track: TrackView, tracks_pipeline: TracksPipelineView) -> InlineQueryResultArticle:
-    redis = RedisClient.current()
+async def create_track_item(redis: RedisService, track: TrackView, tracks_pipeline: TracksPipelineView) -> InlineQueryResultArticle:
     settings = get_settings()
+
     result_id = unique_result_id()
     await redis.save_result_query(result_id=result_id, track=track, ttl=settings.REDIS_RESULT_TTL)
 

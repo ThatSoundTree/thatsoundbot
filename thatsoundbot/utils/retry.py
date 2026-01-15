@@ -7,7 +7,7 @@ from tenacity import (
     retry_if_result,
 )
 
-RETRYABLE_STATUS_CODES = {408, 429, 500, 502, 503, 504}
+RETRYABLE_STATUS_CODES = {408, 429, 500, 502, 504}
 
 
 def is_retryable_response(response: httpx.Response) -> bool:

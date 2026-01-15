@@ -5,6 +5,7 @@ from loguru import logger
 
 from thatsoundbot.core import create_bot, create_dispatcher
 from thatsoundbot.core.handlers import inline_router, integrations_router
+from thatsoundbot.db import RedisClient
 from thatsoundbot.settings import get_settings
 from thatsoundbot.utils.http_client import HttpClient
 
@@ -24,6 +25,7 @@ async def main() -> None:
 
     logger.info("Starting application")
     HttpClient.startup()
+    await RedisClient.startup()
 
     bot_info = await bot.get_me()
     logger.info(
@@ -38,6 +40,7 @@ async def main() -> None:
     logger.info("Shutting down application...")
     await bot.session.close()
     await HttpClient.shutdown()
+    await RedisClient.shutdown()
 
 
     logger.info("Bot session closed")
