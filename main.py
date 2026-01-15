@@ -6,8 +6,7 @@ from loguru import logger
 from thatsoundbot.core import create_bot, create_dispatcher
 from thatsoundbot.core.handlers import inline_router, integrations_router
 from thatsoundbot.settings import get_settings
-
-
+from thatsoundbot.utils.http_client import HttpClient
 
 log_level = os.getenv("TELEGRAM_BOT_LOG_LEVEL", "INFO")
 logger.remove()
@@ -23,7 +22,8 @@ async def main() -> None:
     dp.include_router(integrations_router)
     dp.include_router(inline_router)
 
-    logger.info("Bot is starting...")
+    logger.info("Starting application")
+    HttpClient.startup()
 
     bot_info = await bot.get_me()
     logger.info(
@@ -34,7 +34,12 @@ async def main() -> None:
 
     logger.info("Starting polling...")
     await dp.start_polling(bot, drop_pending_updates=True)
+
+    logger.info("Shutting down application...")
     await bot.session.close()
+    await HttpClient.shutdown()
+
+
     logger.info("Bot session closed")
 
 
