@@ -51,17 +51,16 @@ async def inline_query_handler(inline_query: InlineQuery, redis: RedisService, h
     await inline_query.answer(results=results, cache_time=3)  # type: ignore[arg-type]
 
 
-@router.callback_query(F.data)
+@router.callback_query(F.data == "loading")
 async def loading_callback_handler(callback: CallbackQuery) -> None:
-    print(callback.data)
-    print(callback)
+    """Handle loading button callback from inline messages."""
+    logger.info("[callback] loading button clicked, data=%s", callback.data)
     await callback.answer()
 
 
 @router.chosen_inline_result()
 async def chosen_inline_result_handler(chosen_result: ChosenInlineResult, redis: RedisService, hgramid: str) -> None:
     """Handle chosen inline result and send track text."""
-
     bot = chosen_result.bot
     if not (bot and chosen_result.inline_message_id):
         raise RuntimeError
