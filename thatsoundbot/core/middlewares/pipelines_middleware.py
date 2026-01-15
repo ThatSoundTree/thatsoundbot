@@ -4,7 +4,7 @@ from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject, Message, CallbackQuery, InlineQuery, ChosenInlineResult
 
 from thatsoundbot.settings import get_pipelines
-from thatsoundbot.utils.hashing import hash_telegram_id
+from thatsoundbot.utils.hashing import to_hgramid
 
 
 class PipelineMiddleware(BaseMiddleware):
@@ -19,7 +19,7 @@ class PipelineMiddleware(BaseMiddleware):
         hgramid = None
         if isinstance(event, (Message, CallbackQuery, InlineQuery, ChosenInlineResult)) and event.from_user:
             language_code = event.from_user.language_code
-            hgramid = hash_telegram_id(event.from_user.id)
+            hgramid = to_hgramid(event.from_user.id)
 
         pipelines = get_pipelines()
         pipeline = pipelines[language_code] if language_code else pipelines.RU

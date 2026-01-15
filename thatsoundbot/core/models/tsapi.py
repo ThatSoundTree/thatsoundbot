@@ -1,5 +1,8 @@
-from pydantic import BaseModel, ConfigDict
+from enum import Enum
+from uuid import UUID
 
+from pydantic import BaseModel, ConfigDict
+from dataclasses import dataclass
 from thatsoundbot.settings import TSAPISettings
 
 
@@ -26,3 +29,15 @@ class RecentTracksView(BaseModel):
     """Response model for recently played tracks."""
 
     tracks: IntegrationsTracks
+
+
+class ScrobbleStatus(Enum):
+    CACHED = 1
+    CREATED = -1
+
+
+@dataclass(slots=True)
+class ScrobbleResult:
+    status: ScrobbleStatus
+    file_id: str | None = None
+    scrobble_id: UUID | None = None

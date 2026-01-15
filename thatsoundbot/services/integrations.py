@@ -1,7 +1,8 @@
+import asyncio
 
 from loguru import logger
 
-from thatsoundbot.db import RedisClient
+from thatsoundbot.db.redis import RedisService
 from thatsoundbot.settings import get_tsapi_settings
 from thatsoundbot.utils.http_client import HttpClient
 
@@ -19,8 +20,9 @@ async def create_remote_user(hgramid: str) -> None:
         return
 
 
-async def get_user_integrations(hgramid: str) -> dict:
-    redis = RedisClient.current()
-    has_spotify = await redis.has_spotify_integration(hgramid=hgramid)
-    has_yandex_music = await redis.has_yandex_music_integration(hgramid=hgramid)
+async def get_user_integrations(redis: RedisService, hgramid: str) -> dict:
+    has_spotify, has_yandex_music = await asyncio.gather(
+        redis.has_spotify_integration(hgramid=hgramid),
+        redis.has_yandex_music_integration(hgramid=hgramid)
+    )
     return {"spotify": has_spotify, "YandexMusic": has_yandex_music}

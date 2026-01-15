@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
 
     TOKEN: SecretStr
-    HASH_KEY: SecretStr = Field(description="Secret key for hashing telegram_id to htelegram_id")
+    HASH_KEY: SecretStr = Field(description="Secret key for hashing telegram_id to hgramid")
     PIPELINES_PATH: str = Field(default="pipelines.json", description="Path to pipelines.json file")
 
     LOGS_CHANNEL_URL: str
